@@ -1,15 +1,22 @@
 # Verification record
 
-Date: 2026-11-11. **Status: published; latest staged/live automated browser checks and desktop/mobile visual review completed.**
+Date: 2026-11-11. **Status: original SOLARIS artwork and shared logo styling restored; new deployment checks pending.**
 
 - Repository: https://github.com/SOLARIS-JHU/FE-OC-website
 - Live site: https://solaris-jhu.github.io/FE-OC-website/
 - First fully successful deployment and live verification: https://github.com/SOLARIS-JHU/FE-OC-website/actions/runs/43075206058
 - Previous successful deployment and live verification: https://github.com/SOLARIS-JHU/FE-OC-website/actions/runs/43077280785
 - Previously verified content commit: `cc9cebc641c7cd8d68cd0a94e3f4e97ebf4b6a30`.
-- Latest successful deployment and live verification: https://github.com/SOLARIS-JHU/FE-OC-website/actions/runs/43082617288
-- Verified latest published-content commit: `c29888f8c25bea3384d5b2f8451ba8b1265dbe5e`.
-- The latest workflow completed successfully. Staged and live browser checks passed all four configurations with no failed checks; desktop and 390px mobile visual review also passed.
+- Previous presentation's successful deployment and live verification: https://github.com/SOLARIS-JHU/FE-OC-website/actions/runs/43082617288
+- Previous presentation's verified content commit: `c29888f8c25bea3384d5b2f8451ba8b1265dbe5e`.
+- That workflow and its desktop/mobile review passed; it predates the restoration described below.
+
+## Original-artwork restoration
+
+- The main and full-size overview pages now embed the exact SOLARIS papers-page SVG, Git blob `a5d6c72b02d5b6f9756fc7ec97e15efe62d893fb`, without changing its artwork.
+- The original site's `v9-policyfe` animation is reused: three existing trajectories and endpoint markers progress on a nine-second cycle. The custom replacement artwork and its generator were removed.
+- UCLA inherits the same grayscale/opacity, hover and keyboard-focus rules as the other institutional logos; the official SVG bytes remain unchanged.
+- Browser checks now inspect actual trajectory geometry during playback, pause and resume, verify the original SVG hash, and check UCLA's default/hover/focus styling. Deployment and visual-review results will be recorded here after completion.
 
 ## Scientific audit and completed local checks
 
@@ -19,12 +26,12 @@ Date: 2026-11-11. **Status: published; latest staged/live automated browser chec
 - Recorded source disagreements (2D cost norm, percentage statement, operator-loss description, bicycle normalization, README commands) in `SOURCE_MAP.md`; material 2D and operator distinctions are also public.
 - All three HTML tables match the exact decimal strings transcribed from the paper. Chart uses Decimal arithmetic on those values and explicitly labels its ratio-of-means calculation.
 - Kept dynamics fixed within each family, distinguished offline training from deployment, distinguished LS new-task data from data-free operator inference, and preserved state/time feedback.
-- The original SOLARIS graphical abstract remains available as a source asset and matches its recorded Git blob SHA. The page now embeds a new method-specific animated overview of offline basis learning, optional operator training, online coefficient inference, and feedback execution.
-- All 46 assets have SHA-256 checksums in `assets/manifest.json`.
-- Static validation passes: 5 images with alt text and dimensions, 49 page references, local HTML/CSS dependencies, anchors, single H1, language, author metadata, BibTeX consistency, all three tables, SVG integrity, no placeholders.
+- The embedded original SOLARIS graphical abstract matches its recorded Git blob SHA. The static asset remains complete and readable without JavaScript.
+- All 44 assets have SHA-256 checksums in `assets/manifest.json`.
+- Static validation passes: 5 images with alt text and dimensions, 215 page references (including SVG glyph references), local HTML/CSS dependencies, anchors, single H1, language, author metadata, BibTeX consistency, all three tables, SVG integrity, no placeholders.
 - All 23 page LaTeX expressions render successfully with the locally shipped KaTeX 0.16.22 in strict validation. Seven additional feedback-diagram equations are pre-rendered as HTML and MathML by `scripts/build_feedback.cjs`.
 - The feedback diagram now uses HTML/MathML equations over vector connectors in a 1000px scrollable layout, with a full-size link. The former 800px SVG presentation is no longer the embedded feedback diagram.
-- Animated operation flows represent training updates, coefficient inference and feedback execution; permanent model-transfer links remain static. Playback controls and reduced-motion handling passed the latest staged/live browser checks. The paused no-JavaScript overview fallback was inspected in the generated source, but was not separately browser-tested with scripting disabled.
+- The source-site animation changes only the three illustrative trajectories and their endpoint markers; bases, coefficients and diagram connections remain as in the original artwork. Reduced motion restores the original complete paths. The no-JavaScript fallback was inspected in source, but was not separately browser-tested with scripting disabled.
 - Added the official UCLA campus-logo artwork from UCLA Design System 2.7.0, preserving its colors and proportions. Its provenance and trademark treatment are recorded in `ASSET_PROVENANCE.md` and `NOTICE`.
 - The Paper button links to https://ieeexplore.ieee.org/document/11615530, confirmed through DBLP's electronic-edition link. The separate arXiv link and citation retain the revision used for the scientific summary.
 - Method labels and captions explain the algorithm without diagram-production commentary. Technical acronyms are defined, including American Control Conference (ACC), University of California, Los Angeles (UCLA), Institute of Electrical and Electronics Engineers (IEEE), function encoder (FE), least squares (LS), two-dimensional (2D), graphics processing unit (GPU), and adaptive moment estimation (Adam).
@@ -34,7 +41,7 @@ Date: 2026-11-11. **Status: published; latest staged/live automated browser chec
 - GitHub Actions workflow includes content validation, KaTeX validation, allowlist staging, browser checks, Pages deployment with scoped permissions, and live verification.
 - No research-code repository or other SOLARIS website repository was modified.
 
-## Latest deployment and visual verification
+## Previous presentation's deployment and visual verification
 
 - Run `43082617288` completed successfully for content commit `c29888f8c25bea3384d5b2f8451ba8b1265dbe5e`. Both the build job's staged browser checks and the deployment job's actual live-site checks passed.
 - All 74 files at that content commit matched the prepared local source by raw-byte Git blob hashes, with zero differences. Subsequent verification-record updates affect documentation only.
@@ -64,7 +71,7 @@ The following historical results apply to earlier published revisions. Verificat
 - The local executor cannot reach external hosts or a loopback preview. Rendered browser and live HTTP checks ran on GitHub Actions using `scripts/browser_qa.cjs`, including the latest successful workflow. No local HTTP success is claimed.
 - Visual review and automated layout checks do not establish complete accessibility conformance; browsers other than Chromium have not been tested. Wide figures, equations, tables and BibTeX intentionally use horizontal scrolling on narrow screens.
 - IEEE returns robot verification, and the official conference-program domain blocks retrieval. ACC acceptance is confirmed by author sources; DBLP supplies conference bibliographic details and the IEEE link. ArXiv v2 citation is verified; conference DOI is omitted.
-- ArXiv full text was readable, but original experimental figure-file bytes could not be fetched into this executor. The page uses a method-specific explanatory overview and a clearly identified table replot; the original SOLARIS vector abstract is retained as an asset, and original experimental trajectories remain accessible through the paper resources.
+- ArXiv full text was readable, but original experimental figure-file bytes could not be fetched into this executor. The page uses the original SOLARIS vector abstract with its source-site animation and a clearly identified table replot. Original experimental trajectories remain accessible through the paper resources.
 - Models were not retrained or reevaluated; external bicycle dataset downloads were not checked. No confidence intervals, timing benchmarks, or physical results are invented.
 
 ## Maintenance

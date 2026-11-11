@@ -20,7 +20,7 @@ AUTHORS = [
  ('Ján Drgoňa','4','https://drgona.github.io/')
 ]
 BIB = (ROOT/'citation.bib').read_text(encoding='utf-8').strip()
-ABSTRACT = (ROOT/'assets/figures/graphical-abstract-animated.svg').read_text(encoding='utf-8').replace('data-paused="false"', 'data-paused="true"', 1)
+ABSTRACT = (ROOT/'assets/figures/graphical-abstract.svg').read_text(encoding='utf-8')
 FEEDBACK = (ROOT/'assets/figures/feedback-fragment.html').read_text(encoding='utf-8')
 author_html = '\n'.join(f'<span class="author"><a href="{url}">{name}</a><sup>{aff}</sup></span>' for name,aff,url in AUTHORS)
 author_meta = '\n'.join(f'<meta name="citation_author" content="{name}">' for name,_,_ in AUTHORS)
@@ -84,8 +84,8 @@ __AUTHOR_META__
   <div class="opening"><p class="summary"><strong>Learn a shared control-policy basis. Adapt its coefficients to a new objective.</strong><br>
   Function encoders separate offline imitation learning from task adaptation, enabling feedback policies to transfer without retraining their neural bases.</p></div>
   <figure class="overview-figure">
-   <div class="abstract-scroll" tabindex="0" role="region" aria-label="Animated overview of function encoder training and transfer">__ANIMATED_ABSTRACT__</div>
-   <div class="figure-controls"><button class="btn" id="toggle-abstract" type="button" aria-pressed="false" aria-controls="feoc-abstract" hidden>Pause animation</button><a href="assets/figures/overview.html">Open full-size overview</a></div>
+   <div class="abstract-scroll" id="solaris-abstract" data-paused="true" tabindex="0" role="region" aria-label="Function encoder training and transfer">__SOLARIS_ABSTRACT__</div>
+   <div class="figure-controls"><button class="btn" id="toggle-abstract" type="button" aria-pressed="false" aria-controls="solaris-abstract" hidden>Pause animation</button><a href="assets/figures/overview.html">Open full-size overview</a></div>
    <figcaption>Learn shared policy bases from training tasks, then infer new-task coefficients from demonstrations or task parameters. The learned bases remain fixed during deployment.<span class="mobile-figure-hint">Scroll horizontally to follow every stage.</span></figcaption>
   </figure>
   <div class="logos">
@@ -198,7 +198,7 @@ __AUTHOR_META__
 <footer><div class="wrap"><p><a href="https://solaris-jhu.github.io/solaris-website/">SOLARIS Lab</a> · Johns Hopkins University<br>Website foundation adapted from <a href="https://solaris-jhu.github.io/TQPNet/">TQPNet</a> under the Apache License 2.0. <a href="NOTICE">Attribution and asset notices</a>.</p></div></footer>
 </body></html>
 '''
-replacements = {'__TITLE__':TITLE,'__URL__':URL,'__DESCRIPTION__':DESCRIPTION,'__AUTHORS__':author_html,'__AUTHOR_META__':author_meta,'__SCHEMA__':structured,'__BIB__':html.escape(BIB),'__ANIMATED_ABSTRACT__':ABSTRACT,'__FEEDBACK_DIAGRAM__':FEEDBACK,
+replacements = {'__TITLE__':TITLE,'__URL__':URL,'__DESCRIPTION__':DESCRIPTION,'__AUTHORS__':author_html,'__AUTHOR_META__':author_meta,'__SCHEMA__':structured,'__BIB__':html.escape(BIB),'__SOLARIS_ABSTRACT__':ABSTRACT,'__FEEDBACK_DIAGRAM__':FEEDBACK,
  '__TABLE1__':table('table1',['Evaluation','Numerical reference','FE–LS','FE–operator'],'Table I · mean objective, 2D path planning'),
  '__TABLE2__':table('table2',['Evaluation','Numerical reference','FE–LS','FE–operator'],'Table II · mean objective, quadcopter'),
  '__TABLE3__':table('table3',['Setting','Method','Control cost','Obstacle cost','Terminal position deviation'],'Table III · bicycle, means on unseen configurations')}
@@ -210,8 +210,8 @@ overview = '''<!doctype html>
 <link rel="stylesheet" href="../fonts/fonts.css"><link rel="stylesheet" href="../../template.css"><link rel="stylesheet" href="../../style.css">
 <script defer src="../../site.js"></script></head><body><main class="wrap" style="padding-block:2rem">
 <p><a href="../../">Return to the research page</a></p><h1>Learn shared bases. Transfer to new objectives.</h1>
-<figure class="overview-figure"><div class="abstract-scroll" tabindex="0" role="region" aria-label="Function encoder training and transfer">'''+ABSTRACT+'''</div>
-<div class="figure-controls"><button class="btn" id="toggle-abstract" type="button" aria-pressed="false" aria-controls="feoc-abstract" hidden>Pause animation</button></div>
+<figure class="overview-figure"><div class="abstract-scroll" id="solaris-abstract" data-paused="true" tabindex="0" role="region" aria-label="Function encoder training and transfer">'''+ABSTRACT+'''</div>
+<div class="figure-controls"><button class="btn" id="toggle-abstract" type="button" aria-pressed="false" aria-controls="solaris-abstract" hidden>Pause animation</button></div>
 <figcaption>Training learns shared policy bases; new-task inference changes the coefficients while keeping those bases fixed.</figcaption></figure>
 </main></body></html>'''
 (ROOT/'assets/figures/overview.html').write_text(overview,encoding='utf-8')

@@ -77,6 +77,7 @@ async function runCase(browser, target, configuration) {
     permissions: ['clipboard-read', 'clipboard-write']
   });
   const page = await context.newPage();
+  let officialTrajectoryGeometry;
   page.setDefaultTimeout(15000);
   page.on('console', message => { if (message.type() === 'error') result.consoleErrors.push(message.text()); });
   page.on('pageerror', error => result.pageErrors.push(error.message));
@@ -131,35 +132,16 @@ async function runCase(browser, target, configuration) {
     throw error;
   }
   async function screenshot(suffix) {
-    // Freeze just the explanatory animation while capturing the same readable
-    // frame. Restore its time and playback state before any interaction tests.
-    const frozen = await page.evaluateHandle(() => {
-      const states = (document.querySelector('#feoc-abstract')?.getAnimations({ subtree: true }) || [])
-        .map(animation => ({ animation, time: animation.currentTime, playbackRate: animation.playbackRate }));
-      // Do not call play()/pause(): those can override CSS animation-play-state
-      // and would contaminate the subsequent test of the user's pause control.
-      for (const { animation } of states) { animation.playbackRate = 0; animation.currentTime = 1200; }
-      return states;
-    });
-    try {
-      if (await frozen.evaluate(states => states.length > 0)) result.screenshotAnimationTimeMs = 1200;
-      const filename = `${configuration.name}-${suffix}.png`;
-      await page.screenshot({ path: path.join(out, filename), fullPage: true });
-      result.screenshots.push(filename);
-      // Public-page previews can be inspected through Actions logs when artifact
-      // downloads are unavailable to a reviewer. No browser storage is captured.
-      if (options['emit-preview'] && suffix === 'initial' && ['desktop', 'mobile-390'].includes(configuration.name)) {
-        const previewName = `${configuration.name}-preview.jpg`;
-        const bytes = await page.screenshot({ path: path.join(out, previewName), fullPage: true, type: 'jpeg', quality: 55 });
-        const encoded = bytes.toString('base64');
-        for (let offset = 0; offset < encoded.length; offset += 4096) console.log(`FEOC_PREVIEW ${previewName} ${offset / 4096} ${encoded.slice(offset, offset + 4096)}`);
-      }
-    } finally {
-      await frozen.evaluate(states => states.forEach(({ animation, time, playbackRate }) => {
-        animation.currentTime = time;
-        animation.playbackRate = playbackRate;
-      }));
-      await frozen.dispose();
+    const filename = `${configuration.name}-${suffix}.png`;
+    await page.screenshot({ path: path.join(out, filename), fullPage: true });
+    result.screenshots.push(filename);
+    // Public-page previews can be inspected through Actions logs when artifact
+    // downloads are unavailable to a reviewer. No browser storage is captured.
+    if (options['emit-preview'] && suffix === 'initial' && ['desktop', 'mobile-390'].includes(configuration.name)) {
+      const previewName = `${configuration.name}-preview.jpg`;
+      const bytes = await page.screenshot({ path: path.join(out, previewName), fullPage: true, type: 'jpeg', quality: 55 });
+      const encoded = bytes.toString('base64');
+      for (let offset = 0; offset < encoded.length; offset += 4096) console.log(`FEOC_PREVIEW ${previewName} ${offset / 4096} ${encoded.slice(offset, offset + 4096)}`);
     }
   }
   try {
@@ -202,6 +184,29 @@ async function runCase(browser, target, configuration) {
       }));
       assert(evidence.paperLinks.length === 1 && evidence.paperLinks[0].href === 'https://ieeexplore.ieee.org/document/11615530', 'Paper button does not target the publication record', evidence.paperLinks);
       assert(evidence.uclaImages.length > 0 && evidence.uclaImages.every(img => img.complete && img.width > 0 && img.height > 0), 'UCLA logo is missing or failed to decode', evidence.uclaImages);
+      return evidence;
+    });
+
+    await check('Graphical abstract is the exact official SOLARIS asset', async () => {
+      const abstract = page.locator('#solaris-abstract');
+      assert(await abstract.count() === 1, 'Official graphical abstract is missing');
+      const evidence = await abstract.evaluate(wrapper => {
+        const svg = wrapper.querySelector(':scope > svg');
+        return { svgCount: wrapper.querySelectorAll('svg').length, designSystem: svg?.getAttribute('data-design-system'), viewBox: svg?.getAttribute('viewBox'), trajectoryPresent: !!svg?.querySelector('#v9-policyfe-trajectory0'), url: new URL('assets/figures/graphical-abstract.svg', location.href).href };
+      });
+      assert(evidence.svgCount === 1 && evidence.designSystem === 'solaris-v9' && evidence.viewBox === '0 0 760 392' && evidence.trajectoryPresent, 'Inline graphic does not retain the official SOLARIS structure', evidence);
+      assert(await page.locator('#feoc-abstract').count() === 0, 'Replacement diagram remains instead of the official abstract');
+      const response = await context.request.get(evidence.url);
+      assert(response.ok(), 'Official SVG request failed', response.status());
+      const bytes = await response.body();
+      evidence.gitBlobSha1 = crypto.createHash('sha1').update(Buffer.concat([Buffer.from(`blob ${bytes.length}\0`), bytes])).digest('hex');
+      assert(evidence.gitBlobSha1 === 'a5d6c72b02d5b6f9756fc7ec97e15efe62d893fb', 'Served graphical abstract differs from the official SOLARIS file', evidence.gitBlobSha1);
+      officialTrajectoryGeometry = await page.evaluate(source => {
+        const svg = new DOMParser().parseFromString(source, 'image/svg+xml');
+        const paths = [...svg.querySelectorAll('[id^="v9-policyfe-trajectory"]')].map(path => ({ id: path.id, d: path.getAttribute('d') }));
+        const tips = [...svg.querySelectorAll('[id^="v9-policyfe-tip"]')].map(tip => ({ id: tip.id, cx: tip.getAttribute('cx'), cy: tip.getAttribute('cy') }));
+        return JSON.stringify({ paths, tips });
+      }, bytes.toString('utf8'));
       return evidence;
     });
 
@@ -268,50 +273,80 @@ async function runCase(browser, target, configuration) {
       }
     });
 
-    await check('Graphical abstract playback responds to keyboard and motion preferences', async () => {
+    await check('UCLA logo shares the muted institution style and reveals color on interaction', async () => {
+      await page.mouse.move(0, 0);
+      const logos = await page.locator('.logos img').evaluateAll(images => images.map((image, index) => ({ index, src: image.getAttribute('src'), alt: image.alt, filter: getComputedStyle(image).filter })));
+      const ucla = logos.find(logo => /ucla/i.test(logo.src + ' ' + logo.alt));
+      assert(ucla && logos.length > 1, 'Institution logo group is incomplete', logos);
+      assert(ucla.filter !== 'none' && logos.every(logo => logo.filter === ucla.filter), 'UCLA does not match the other muted institution logos', logos);
+      const image = page.locator('.logos img').nth(ucla.index);
+      const link = image.locator('..');
+      assert(await link.evaluate(element => element.tagName === 'A'), 'UCLA logo is not inside its institutional link');
+      await image.hover();
+      await page.waitForFunction(index => getComputedStyle(document.querySelectorAll('.logos img')[index]).filter === 'none', ucla.index);
+      const hoverFilter = await image.evaluate(element => getComputedStyle(element).filter);
+      await page.mouse.move(0, 0);
+      await page.waitForFunction(({ index, filter }) => getComputedStyle(document.querySelectorAll('.logos img')[index]).filter === filter, { index: ucla.index, filter: ucla.filter });
+      await link.focus();
+      // An actual keyboard round trip activates :focus-visible after hovering.
+      await page.keyboard.press('Tab');
+      await page.keyboard.press('Shift+Tab');
+      assert(await link.evaluate(element => element === document.activeElement), 'Keyboard navigation did not return to the UCLA link');
+      await page.waitForFunction(index => getComputedStyle(document.querySelectorAll('.logos img')[index]).filter === 'none', ucla.index);
+      const focusFilter = await image.evaluate(element => getComputedStyle(element).filter);
+      await page.keyboard.press('Tab');
+      await page.waitForFunction(({ index, filter }) => getComputedStyle(document.querySelectorAll('.logos img')[index]).filter === filter, { index: ucla.index, filter: ucla.filter });
+      return { logosAtRest: logos, hoverFilter, focusFilter };
+    });
+
+    await check('Official abstract trajectories pause and resume through the keyboard', async () => {
       const button = page.locator('#toggle-abstract');
-      assert(await button.count() === 1 && await page.locator('#feoc-abstract').count() === 1, 'Animation or playback button is missing');
-      const state = () => page.evaluate(() => {
-        const abstract = document.querySelector('#feoc-abstract');
+      assert(await button.count() === 1, 'Graphical abstract playback control is missing');
+      const sample = () => page.evaluate(() => {
+        const wrapper = document.querySelector('#solaris-abstract');
         const control = document.querySelector('#toggle-abstract');
-        return { paused: abstract.dataset.paused, disabled: control.disabled, text: control.textContent.trim(), pressed: control.getAttribute('aria-pressed'),
-          animations: abstract.getAnimations({ subtree: true }).map(animation => ({ name: animation.animationName || animation.id, time: animation.currentTime, playState: animation.playState, pending: animation.pending })) };
+        const paths = [...wrapper.querySelectorAll('[id^="v9-policyfe-trajectory"]')].map(path => ({ id: path.id, d: path.getAttribute('d') }));
+        const tips = [...wrapper.querySelectorAll('[id^="v9-policyfe-tip"]')].map(tip => ({ id: tip.id, cx: tip.getAttribute('cx'), cy: tip.getAttribute('cy') }));
+        return { paused: wrapper.dataset.paused, disabled: control.disabled, text: control.textContent.trim(), pressed: control.getAttribute('aria-pressed'), paths, tips, geometry: JSON.stringify({ paths, tips }) };
       });
-      const initial = await state();
-      if (configuration.reducedMotion === 'reduce') {
-        assert(initial.disabled && initial.paused === 'true' && initial.pressed === 'true', 'Reduced motion must keep playback paused and its control disabled', initial);
-        assert(!initial.animations.some(animation => animation.playState === 'running' || animation.pending), 'Animation is active under reduced motion', initial);
-        return { initial, reducedMotion: true };
+      const compact = state => ({ paused: state.paused, disabled: state.disabled, text: state.text, pressed: state.pressed, paths: state.paths.map(path => ({ id: path.id, characters: path.d?.length || 0 })), tips: state.tips, geometrySha256: hash(state.geometry) });
+      async function waitForGeometryChange(phase, before) {
+        const started = Date.now();
+        let current;
+        while (Date.now() - started < 15000) {
+          current = await sample();
+          if (current.geometry !== before.geometry) return current;
+          await delay(100);
+        }
+        assert(false, `Official trajectory geometry did not change during ${phase}`, { before: compact(before), after: compact(current) });
       }
-      assert(!initial.disabled && initial.paused === 'false' && initial.text === 'Pause animation' && initial.pressed === 'false', 'Initial playback control state is inconsistent', initial);
-      await page.waitForFunction(() => document.querySelector('#feoc-abstract').getAnimations({ subtree: true }).some(animation => animation.playState === 'running' && !animation.pending && typeof animation.currentTime === 'number'));
-      const animation = await page.evaluateHandle(() => document.querySelector('#feoc-abstract').getAnimations({ subtree: true }).find(animation => animation.playState === 'running' && !animation.pending && typeof animation.currentTime === 'number'));
-      const sample = () => animation.evaluate(value => ({ time: value.currentTime, playState: value.playState, pending: value.pending }));
-      const samples = {};
-      try {
-        samples.runningBefore = await sample();
-        await delay(200);
-        samples.runningAfter = await sample();
-        assert(samples.runningAfter.time > samples.runningBefore.time + 50, 'Animation time does not progress during playback', samples);
-        await button.focus();
-        await waitForNavigationSettled('Animation playback control receives focus', '#toggle-abstract', { visible: true, focused: true });
-        await page.keyboard.press('Enter');
-        await page.waitForFunction(() => document.querySelector('#feoc-abstract').dataset.paused === 'true' && document.querySelector('#feoc-abstract').getAnimations({ subtree: true }).every(animation => animation.playState === 'paused' && !animation.pending));
-        const pausedControl = await state();
-        assert(pausedControl.text === 'Play animation' && pausedControl.pressed === 'true', 'Paused control label or pressed state is incorrect', pausedControl);
-        samples.pausedBefore = await sample();
-        await delay(200);
-        samples.pausedAfter = await sample();
-        assert(samples.pausedBefore.playState === 'paused' && Math.abs(samples.pausedAfter.time - samples.pausedBefore.time) < 1, 'Paused animation continues to progress', samples);
-        await page.keyboard.press('Enter');
-        await page.waitForFunction(() => document.querySelector('#feoc-abstract').dataset.paused === 'false' && document.querySelector('#feoc-abstract').getAnimations({ subtree: true }).some(animation => animation.playState === 'running' && !animation.pending));
-        await delay(200);
-        samples.resumed = await sample();
-        const resumedControl = await state();
-        assert(samples.resumed.playState === 'running' && samples.resumed.time > samples.pausedAfter.time + 50, 'Playback does not resume from its paused position', samples);
-        assert(resumedControl.text === 'Pause animation' && resumedControl.pressed === 'false', 'Resumed control label or pressed state is incorrect', resumedControl);
-        return { initial, pausedControl, resumedControl, samples };
-      } finally { await animation.dispose(); }
+      const initial = await sample();
+      assert(initial.paths.length === 3 && initial.tips.length === 3 && initial.paths.every(path => path.d), 'Official trajectory paths or tips are missing', compact(initial));
+      if (configuration.reducedMotion === 'reduce') {
+        assert(initial.disabled && initial.paused === 'true' && initial.pressed === 'true', 'Reduced motion must disable playback and retain a static figure', compact(initial));
+        assert(initial.geometry === officialTrajectoryGeometry, 'Reduced motion does not preserve the original SVG trajectory geometry', compact(initial));
+        await delay(300);
+        const after = await sample();
+        assert(after.geometry === initial.geometry, 'Official trajectories move with reduced motion enabled', { before: compact(initial), after: compact(after) });
+        return { initial: compact(initial), after: compact(after), reducedMotion: true };
+      }
+      assert(!initial.disabled && initial.paused === 'false' && initial.text === 'Pause animation' && initial.pressed === 'false', 'Playback control state is inconsistent', compact(initial));
+      const running = await waitForGeometryChange('playback', initial);
+      await button.focus();
+      await waitForNavigationSettled('Official animation control receives focus', '#toggle-abstract', { visible: true, focused: true });
+      await page.keyboard.press('Enter');
+      await page.waitForFunction(() => document.querySelector('#solaris-abstract').dataset.paused === 'true');
+      await delay(100);
+      const paused = await sample();
+      assert(paused.text === 'Play animation' && paused.pressed === 'true', 'Paused control label or pressed state is incorrect', compact(paused));
+      await delay(300);
+      const held = await sample();
+      assert(held.geometry === paused.geometry, 'Official trajectories continue changing while paused', { before: compact(paused), after: compact(held) });
+      await page.keyboard.press('Enter');
+      await page.waitForFunction(() => document.querySelector('#solaris-abstract').dataset.paused === 'false');
+      const resumed = await waitForGeometryChange('resumed playback', held);
+      assert(resumed.text === 'Pause animation' && resumed.pressed === 'false', 'Resumed control label or pressed state is incorrect', compact(resumed));
+      return { initial: compact(initial), running: compact(running), paused: compact(paused), held: compact(held), resumed: compact(resumed) };
     });
 
     await check('Every native disclosure opens and closes by keyboard', async () => {
