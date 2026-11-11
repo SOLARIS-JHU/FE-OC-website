@@ -1,0 +1,89 @@
+name: Validate and deploy GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate content and assets
+        run: python3 scripts/validate_site.py
+      - name: Validate mathematics
+        run: node scripts/validate_math.cjs
+      - name: Stage the public site
+        run: python3 scripts/stage_site.py
+      - name: Install browser QA dependencies (CI only)
+        run: |
+          npm install --no-save --package-lock=false --ignore-scripts --no-audit --no-fund playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Check staged site in Chromium
+        run: node scripts/browser_qa.cjs --serve _site --report-dir .qa-tmp/browser-local
+      - name: Save local browser reports and screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-qa-local
+          path: .qa-tmp/browser-local/
+          include-hidden-files: true
+          if-no-files-found: warn
+          retention-days: 14
+      - name: Configure Pages
+        if: github.event_name != 'pull_request'
+        uses: actions/configure-pages@v5
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+  deploy:
+    if: github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+      - name: Install live browser QA dependencies (CI only)
+        run: |
+          npm install --no-save --package-lock=false --ignore-scripts --no-audit --no-fund playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Verify the published site in Chromium
+        env:
+          PAGES_URL: ${{ steps.deployment.outputs.page_url }}
+        run: node scripts/browser_qa.cjs --url "$PAGES_URL" --expected-file index.html --report-dir .qa-tmp/browser-live
+      - name: Save live browser reports and screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-qa-live
+          path: .qa-tmp/browser-live/
+          include-hidden-files: true
+          if-no-files-found: warn
+          retention-days: 14

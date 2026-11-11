@@ -1,0 +1,18 @@
+FE-OC research project website
+
+Website visual foundation: SOLARIS-JHU/TQPNet, Apache License 2.0.
+Original license retained in LICENSE. Page-specific source and style are adapted
+for Zero-Shot Transferable Solution Method for Parametric Optimal Control Problems.
+
+Research: Xingjian Li, Kelvin Kan, Deepanshu Verma, Krishna Kumar, Stanley Osher,
+and Ján Drgoňa. arXiv:2509.18404v2 (11 March 2026), CC BY 4.0.
+https://arxiv.org/abs/2509.18404v2
+https://creativecommons.org/licenses/by/4.0/
+The summary and results chart adapt the paper; the chart replots table means.
+
+SOLARIS graphical abstract and institutional logos remain the property of their
+respective owners. Reuse here is for the requested SOLARIS research page.
+Fraunces and Inter fonts: SIL Open Font License 1.1, included beside fonts.
+KaTeX 0.16.22: MIT license, included in assets/vendor/katex/LICENSE.
+
+See docs/ASSET_PROVENANCE.md and docs/SOURCE_MAP.md for sources and qualifications.

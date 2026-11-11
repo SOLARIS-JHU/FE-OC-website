@@ -1,0 +1,21 @@
+{
+  "source": "https://arxiv.org/html/2509.18404v2",
+  "objective_units": "Paper-defined objective units; no physical units specified",
+  "hardware": "NVIDIA A100 GPU (paper Section V)",
+  "uncertainty": "Means only; no standard deviations or confidence intervals reported",
+  "table1": [
+    ["Seen target", "4.8609", "4.8737", "4.9625"],
+    ["New target: interpolation", "4.8295", "4.8608", "4.9578"],
+    ["New target: extrapolation", "4.8782", "5.0751", "5.3214"]
+  ],
+  "table2": [
+    ["Seen target", "276.9546", "278.8933", "278.4307"],
+    ["New target", "274.3089", "275.5074", "294.5629"]
+  ],
+  "table3": [
+    ["Single obstacle", "FE–LS", "2.6789", "0.0463", "0.0012"],
+    ["Single obstacle", "Numerical reference", "2.6480", "0.0385", "0.00005"],
+    ["Double obstacles", "FE–LS", "3.0370", "0.5750", "0.0046"],
+    ["Double obstacles", "Numerical reference", "2.9668", "0.5286", "0.00004"]
+  ]
+}

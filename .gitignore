@@ -1,0 +1,5 @@
+_site/
+.qa-tmp/
+__pycache__/
+*.pyc
+.venv/
