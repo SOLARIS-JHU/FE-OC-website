@@ -6,11 +6,12 @@ Dedicated SOLARIS research page for **Zero-Shot Transferable Solution Method for
 - Research implementation: [XJ-LI/FE_OC](https://github.com/XJ-LI/FE_OC), inspected at `65337fde9b540b3ecb8f4f4b0771ad1efae71f6a`.
 - Public repository: [SOLARIS-JHU/FE-OC-website](https://github.com/SOLARIS-JHU/FE-OC-website).
 - Live website: [solaris-jhu.github.io/FE-OC-website](https://solaris-jhu.github.io/FE-OC-website/).
-- **Published and verified on 11 November 2026:** [successful deployment and live browser checks](https://github.com/SOLARIS-JHU/FE-OC-website/actions/runs/43082617288) for content commit `c29888f8c25bea3384d5b2f8451ba8b1265dbe5e`. All four staged/live browser configurations passed, and desktop/mobile screenshots were visually reviewed. See `docs/QA.md` for evidence and source limitations.
+- **Previous published revision verified on 11 November 2026:** [successful deployment and live browser checks](https://github.com/SOLARIS-JHU/FE-OC-website/actions/runs/43082617288) for content commit `c29888f8c25bea3384d5b2f8451ba8b1265dbe5e`. All four staged/live browser configurations passed, and desktop/mobile screenshots were visually reviewed.
+- **Current restoration published and verified:** [run 43084941556](https://github.com/SOLARIS-JHU/FE-OC-website/actions/runs/43084941556) passed staged and live browser checks for commit `de1d61cbf00581fa5552c2c5d4764228dc8aacb5`. Desktop/mobile screenshots were visually reviewed. See `docs/QA.md` for evidence and source limitations.
 
-The implementation uses buildless HTML/CSS/JS, the Apache-licensed TQPNet foundation, locally hosted Inter/Fraunces fonts and KaTeX, an animated method overview, LaTeX-rendered feedback equations, and a replot of paper tables. The primary Paper button links to the IEEE conference publication. The research-code repository is separate and unchanged.
+The implementation uses buildless HTML/CSS/JS, the Apache-licensed TQPNet foundation, locally hosted Inter/Fraunces fonts and KaTeX, the exact graphical abstract and trajectory animation from the SOLARIS papers page, LaTeX-rendered feedback equations, and a replot of paper tables. The primary Paper button links to the IEEE conference publication. The research-code repository is separate and unchanged.
 
-The latest browser checks verify the overview's pause/resume controls and reduced-motion presentation, the official UCLA logo, the IEEE Paper link, and all seven pre-rendered feedback equations. The paused no-JavaScript overview fallback was inspected in the generated source. The IEEE destination is confirmed through its bibliographic record; direct inspection still encounters robot verification.
+The latest staged/live browser checks verify the exact original SVG hash, changing trajectory geometry, pause/resume, reduced-motion fallback, UCLA's default/hover/focus styling, the IEEE Paper link, and all seven feedback equations. The UCLA SVG bytes remain unchanged; its display follows shared logo styling, with grayscale and reduced opacity at rest and original color on hover or keyboard focus. The IEEE destination is confirmed through its bibliographic record; direct inspection still encounters robot verification.
 
 ## Preview and validate
 
@@ -33,9 +34,10 @@ GitHub Actions additionally installs Playwright 1.56.1 on Ubuntu 24.04 for CI-on
 - `scripts/build_page.py` is the editable page source; it writes the committed `index.html`. It is not a runtime dependency.
 - `data/results.json` preserves the exact strings transcribed from Tables I–III.
 - `scripts/generate_figures.py` reproduces the table replot and feedback SVG using only Python's standard library.
-- `scripts/generate_abstract.py` reproduces the animated overview and its static fallback. Then run `scripts/build_page.py` to embed the overview and generate its full-size page.
+- `assets/figures/graphical-abstract.svg` is the unchanged official SOLARIS papers-page asset, Git blob `a5d6c72b02d5b6f9756fc7ec97e15efe62d893fb`. `scripts/build_page.py` embeds it and writes `assets/figures/overview.html`. Do not regenerate or redesign it.
+- `site.js` reuses the exact `v9-policyfe` updater from SOLARIS source commit `b8a7ebab0a24bd43c6f60e9dc78de4b338be58d9`, `static/js/paper-abstracts-v13.js`, blob `ad22efa8b90b6bd40580744a7e9c1626ce8f447a`. It reveals three illustrative trajectories and moves their tips; other diagram elements remain static. Full provenance is in `docs/ASSET_PROVENANCE.md`.
 - `node scripts/build_feedback.cjs` generates the seven feedback equations through bundled KaTeX and writes the inline fragment and full-size page. Run it before `scripts/build_page.py` when changing this diagram. The older feedback SVG is retained as a legacy asset.
-- The overview's pause/play control respects reduced-motion preferences. Without JavaScript, the embedded overview remains paused with every stage visible.
+- The overview's pause/play wrapper respects reduced-motion preferences. Without JavaScript or with reduced motion, the complete original static SVG remains visible.
 - `scripts/make_social_preview.py` reproduces the social image using Pillow and local fonts.
 - After intentional asset edits, run `scripts/update_asset_manifest.py`, then validation.
 - `docs/SOURCE_MAP.md` maps claims, equations, numbers and code paths to sources, and records disagreements.

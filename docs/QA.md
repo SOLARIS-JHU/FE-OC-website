@@ -1,6 +1,6 @@
 # Verification record
 
-Date: 2026-11-11. **Status: original SOLARIS artwork and shared logo styling restored; new deployment checks pending.**
+Date: 2026-11-11. **Status: original SOLARIS artwork and shared logo styling published; staged/live browser checks and desktop/mobile visual review completed.**
 
 - Repository: https://github.com/SOLARIS-JHU/FE-OC-website
 - Live site: https://solaris-jhu.github.io/FE-OC-website/
@@ -16,7 +16,11 @@ Date: 2026-11-11. **Status: original SOLARIS artwork and shared logo styling res
 - The main and full-size overview pages now embed the exact SOLARIS papers-page SVG, Git blob `a5d6c72b02d5b6f9756fc7ec97e15efe62d893fb`, without changing its artwork.
 - The original site's `v9-policyfe` animation is reused: three existing trajectories and endpoint markers progress on a nine-second cycle. The custom replacement artwork and its generator were removed.
 - UCLA inherits the same grayscale/opacity, hover and keyboard-focus rules as the other institutional logos; the official SVG bytes remain unchanged.
-- Browser checks now inspect actual trajectory geometry during playback, pause and resume, verify the original SVG hash, and check UCLA's default/hover/focus styling. Deployment and visual-review results will be recorded here after completion.
+- [Run 43084941556](https://github.com/SOLARIS-JHU/FE-OC-website/actions/runs/43084941556) completed successfully for content commit `de1d61cbf00581fa5552c2c5d4764228dc8aacb5`; build, Pages deployment and actual live-site checks passed.
+- Staged and live Chromium checks passed at 1440px, 390px, 320px, and 1440px dark mode with reduced motion. Live HTML matched the checked-out source.
+- Browser checks verified the exact original SVG hash; actual trajectory path/tip changes during playback; frozen geometry on keyboard pause; changes after resume; and exact original complete geometry under reduced motion. UCLA's filter matched every other institutional logo at rest and changed to full color on hover and keyboard focus.
+- Desktop and native-width mobile screenshots were visually reviewed. The original artwork remains legible within its intended scroll container; UCLA is muted gray at rest. The actual published desktop overview was also inspected. No unintended overlap or page-wide overflow was observed.
+- The existing IEEE publication link, seven LaTeX feedback equations, navigation, local resources, citations, math rendering and other browser checks also passed. Screenshot animation phases may differ; byte-identical preview images are not required for this revision.
 
 ## Scientific audit and completed local checks
 
