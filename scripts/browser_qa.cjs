@@ -84,7 +84,51 @@ async function runCase(browser, target, configuration) {
   page.on('response', response => { if (response.status() >= 400) result.badResponses.push({ url: response.url(), status: response.status() }); });
   async function check(name, operation) {
     try { const evidence = await operation(); result.checks.push({ name, status: 'passed', evidence }); return true; }
-    catch (error) { result.checks.push({ name, status: 'failed', error: error.message }); return false; }
+    catch (error) { result.checks.push({ name, status: 'failed', error: error.message, ...(error.diagnostics ? { diagnostics: error.diagnostics } : {}) }); return false; }
+  }
+  async function navigationState(selector) {
+    return page.evaluate(selector => {
+      const target = document.querySelector(selector);
+      const active = document.activeElement;
+      const rect = element => {
+        if (!element) return null;
+        const box = element.getBoundingClientRect();
+        return { top: box.top, right: box.right, bottom: box.bottom, left: box.left, width: box.width, height: box.height };
+      };
+      const targetRect = rect(target);
+      const targetStyle = target && getComputedStyle(target);
+      return {
+        selector, hash: location.hash, scrollX, scrollY, viewport: { width: innerWidth, height: innerHeight },
+        targetText: target?.textContent.trim().slice(0, 160), targetRect,
+        targetVisible: !!targetRect && targetRect.width > 0 && targetRect.height > 0 &&
+          targetRect.top >= -1 && targetRect.left >= -1 && targetRect.bottom <= innerHeight + 1 && targetRect.right <= innerWidth + 1 &&
+          targetStyle.display !== 'none' && targetStyle.visibility !== 'hidden',
+        targetFocused: target === active,
+        active: active ? { tag: active.tagName, id: active.id, class: active.className, href: active.getAttribute('href'), text: active.textContent.trim().slice(0, 160), rect: rect(active), withinMain: !!active.closest('main') } : null
+      };
+    }, selector);
+  }
+  async function waitForNavigationSettled(phase, selector, requirements = {}) {
+    // A heading can enter the viewport before smooth scrolling ends. Require
+    // stable geometry before the next key/focus event can start another scroll.
+    const started = Date.now();
+    let previousGeometry, stableSince = started;
+    const recentSamples = [];
+    while (Date.now() - started < 15000) {
+      const state = await navigationState(selector);
+      const geometry = JSON.stringify([state.scrollX, state.scrollY, state.viewport, state.targetRect]);
+      const matches = (!requirements.hash || state.hash === requirements.hash) &&
+        (!requirements.visible || state.targetVisible) && (!requirements.focused || state.targetFocused);
+      if (geometry !== previousGeometry || !matches) stableSince = Date.now();
+      previousGeometry = geometry;
+      recentSamples.push({ elapsedMs: Date.now() - started, ...state });
+      if (recentSamples.length > 8) recentSamples.shift();
+      if (matches && Date.now() - stableSince >= 250) return { phase, settledForMs: Date.now() - stableSince, ...state };
+      await delay(50);
+    }
+    const error = new Error(`Keyboard navigation did not settle during: ${phase}`);
+    error.diagnostics = { phase, requirements, recentSamples };
+    throw error;
   }
   async function screenshot(suffix) {
     const filename = `${configuration.name}-${suffix}.png`;
@@ -143,21 +187,32 @@ async function runCase(browser, target, configuration) {
     await check('Capture initial layout', () => screenshot('initial'));
 
     await check('Skip link and section links work from the keyboard', async () => {
-      await page.keyboard.press('Tab');
-      assert(await page.locator('.skip').evaluate(el => el === document.activeElement), 'Skip link is not first in keyboard order');
-      const box = await page.locator('.skip').boundingBox();
-      assert(box && box.x >= 0 && box.y >= 0 && box.x + box.width <= configuration.width + 1, 'Focused skip link is clipped', box);
-      await page.keyboard.press('Enter');
-      await page.waitForFunction(() => location.hash === '#overview' && Math.abs(document.querySelector('#overview').getBoundingClientRect().top) < 60);
-      await page.keyboard.press('Tab');
-      assert(await page.evaluate(() => !!document.activeElement.closest('main')), 'Tab navigation did not move into the research content after skipping');
-      const resultsLink = page.getByRole('navigation', { name: 'Page sections' }).getByRole('link', { name: 'Results', exact: true });
-      await resultsLink.focus();
-      const focusStyle = await resultsLink.evaluate(el => ({ style: getComputedStyle(el).outlineStyle, width: getComputedStyle(el).outlineWidth }));
-      assert(focusStyle.style !== 'none' && parseFloat(focusStyle.width) > 0, 'Keyboard focus indicator is missing', focusStyle);
-      await page.keyboard.press('Enter');
-      await page.waitForFunction(() => location.hash === '#results' && Math.abs(document.querySelector('#results').getBoundingClientRect().top) < 60);
-      return { skipTarget: '#overview', sectionTarget: '#results', focusStyle };
+      const phases = [];
+      try {
+        phases.push(await waitForNavigationSettled('Initial viewport', 'h1', { visible: true }));
+        await page.keyboard.press('Tab');
+        const skip = await navigationState('.skip');
+        phases.push({ phase: 'First Tab reaches skip link', ...skip });
+        assert(skip.targetFocused, 'Skip link is not first in keyboard order', skip);
+        assert(skip.targetVisible, 'Focused skip link is clipped', skip);
+        await page.keyboard.press('Enter');
+        phases.push(await waitForNavigationSettled('Skip link reaches research heading', '#overview h2', { hash: '#overview', visible: true }));
+        await page.keyboard.press('Tab');
+        const contentFocus = await waitForNavigationSettled('Tab after skip link', '#overview h2', { hash: '#overview' });
+        phases.push(contentFocus);
+        assert(contentFocus.active?.withinMain, 'Tab navigation did not move into the research content after skipping', contentFocus);
+        const resultsLink = page.getByRole('navigation', { name: 'Page sections' }).getByRole('link', { name: 'Results', exact: true });
+        await resultsLink.focus();
+        phases.push(await waitForNavigationSettled('Results link receives focus', '.section-nav a[href="#results"]', { visible: true, focused: true }));
+        const focusStyle = await resultsLink.evaluate(el => ({ style: getComputedStyle(el).outlineStyle, width: getComputedStyle(el).outlineWidth }));
+        assert(focusStyle.style !== 'none' && parseFloat(focusStyle.width) > 0, 'Keyboard focus indicator is missing', focusStyle);
+        await page.keyboard.press('Enter');
+        phases.push(await waitForNavigationSettled('Results link reaches results heading', '#results h2', { hash: '#results', visible: true }));
+        return { skipTarget: '#overview', sectionTarget: '#results', focusStyle, phases };
+      } catch (error) {
+        error.diagnostics = { phases, failure: error.diagnostics || null, overview: await navigationState('#overview h2'), results: await navigationState('#results h2') };
+        throw error;
+      }
     });
 
     await check('Every native disclosure opens and closes by keyboard', async () => {
