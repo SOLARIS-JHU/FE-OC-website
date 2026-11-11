@@ -64,3 +64,4 @@ section[id], h3[id] { scroll-margin-top: 1.5rem; }
 #table3 td:nth-child(2), #table3 th:nth-child(2) { text-align: left; }
 .figure > img { background: #fff; border: 1px solid var(--border); }
 @media (max-width:700px) { .overview-figure img { min-width: 700px; } .figure > img { min-width: 0; } }
+@media (max-width:700px) { .feedback-figure .figure-link img { min-width: 800px; } }
