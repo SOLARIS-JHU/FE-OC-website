@@ -6,7 +6,7 @@ Dedicated SOLARIS research page for **Zero-Shot Transferable Solution Method for
 - Research implementation: [XJ-LI/FE_OC](https://github.com/XJ-LI/FE_OC), inspected at `65337fde9b540b3ecb8f4f4b0771ad1efae71f6a`.
 - Public repository: [SOLARIS-JHU/FE-OC-website](https://github.com/SOLARIS-JHU/FE-OC-website).
 - Live website: [solaris-jhu.github.io/FE-OC-website](https://solaris-jhu.github.io/FE-OC-website/).
-- **Published and verified on 11 November 2026:** [successful deployment and live browser checks](https://github.com/SOLARIS-JHU/FE-OC-website/actions/runs/43075206058). See `docs/QA.md` for evidence and source limitations.
+- **Published and verified on 11 November 2026:** [successful deployment and live browser checks](https://github.com/SOLARIS-JHU/FE-OC-website/actions/runs/43077280785). Desktop/mobile screenshots were visually reviewed. See `docs/QA.md` for evidence and source limitations.
 
 The implementation uses buildless HTML/CSS/JS, the Apache-licensed TQPNet foundation, locally hosted Inter/Fraunces fonts and KaTeX, the existing SOLARIS graphical abstract, and a transparent replot of paper tables. The research-code repository is separate and unchanged.
 
