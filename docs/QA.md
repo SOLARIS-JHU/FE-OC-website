@@ -1,6 +1,12 @@
 # Verification record
 
-Date: 2026-11-11. **Status: implemented and locally validated; not published.**
+Date: 2026-11-11. **Status: published; staged and live automated browser checks passed.**
+
+- Repository: https://github.com/SOLARIS-JHU/FE-OC-website
+- Live site: https://solaris-jhu.github.io/FE-OC-website/
+- First fully successful deployment and live verification: https://github.com/SOLARIS-JHU/FE-OC-website/actions/runs/43075206058
+- Verified source commit: `d2246d37958a27701d56463c7fbc86a8a8365eec`.
+- All 66 committed files were compared with the local source using Git blob hashes; no differences were found.
 
 ## Completed
 
@@ -18,21 +24,21 @@ Date: 2026-11-11. **Status: implemented and locally validated; not published.**
 - Responsive CSS, focus styles, skip link, keyboard-focusable scroll regions, semantic tables, native details, live citation-copy status, and reduced-motion handling are present. Figures are intentionally static.
 - GitHub Actions workflow includes content validation, KaTeX validation, allowlist staging and Pages deployment with scoped permissions.
 - No existing research or website repository was modified.
+- GitHub Actions build and Pages deployment succeeded. The first run exposed an unsupported Ubuntu 26.04/Playwright combination; pinning the runner to Ubuntu 24.04 resolved it.
+- Chromium passed all checks on both the staged site under `/FE-OC-website/` and the actual published HTTPS URL. The live test first confirmed fetched HTML matched the checked-out source.
+- Browser configurations: 1440px desktop, 390px mobile, 320px mobile, and 1440px dark mode with reduced motion.
+- Verified image decoding, local Inter/Fraunces/KaTeX font loading, rendered equations, no page-wide overflow (including expanded disclosures), scrollable wide content, skip/section links, visible keyboard focus, native disclosures, keyboard table scrolling, exact clipboard BibTeX, local resources/anchors, reduced motion and absence of console errors or failed page resources.
+- Full-page initial/expanded screenshots and detailed JSON reports are attached to the workflow as `browser-qa-local` and `browser-qa-live` artifacts. Their retention is 14 days; compact public previews are also available in subsequent live-check logs.
+- Author profile, arXiv and acceptance-announcement links were checked through official/author pages. Kelvin Kan's older `home.html` resolves through a move notice to `index.html`; the link is functional.
 
-## Pending / external limitations
+## Source and verification limitations
 
-- The GitHub connector permits file operations but does not expose repository creation or Pages settings. `SOLARIS-JHU/FE-OC-website` returned 404 when checked. Browser controls and an authenticated local GitHub CLI were unavailable; local executor network access could not resolve external hosts. The new repository has **not** been created.
-- Consequently no remote workflow run, deployment job, or published-site verification has occurred. The intended Pages URL must not be advertised as live.
-- Browser tooling is unavailable. Full desktop/mobile layout, clipboard interaction, keyboard navigation in a rendered browser, and browser-console checks remain pending. Image inspection and static checks are not substitutes for those checks.
-- Local HTTP verification was attempted, but the executor denied the loopback socket connection with Windows error 10013. The server was shut down and temporary staging files were cleaned up. `scripts/check_local_http.py` is provided for a later environment with local socket access; no HTTP success is claimed.
+- The local executor cannot reach external hosts or a loopback preview. Rendered browser and live HTTP checks therefore ran on GitHub Actions, using `scripts/browser_qa.cjs`. No local HTTP success is claimed.
+- Full-page screenshots have been generated; final visual inspection is recorded separately after retrieval. Automated layout checks do not establish complete accessibility conformance, and browsers other than Chromium have not been tested.
 - IEEE returns robot verification, and the official conference-program domain blocks retrieval. ACC acceptance is confirmed by author sources; DBLP supplies conference bibliographic details. ArXiv v2 citation is verified; conference DOI is omitted.
 - ArXiv full text was readable, but original figure-file bytes could not be fetched into this executor. The page uses the official SOLARIS vector abstract and clearly identified table replot; original experimental trajectories remain accessible through the paper link.
 - Models were not retrained or reevaluated; external bicycle dataset downloads were not checked. No confidence intervals, timing benchmarks, or physical results are invented.
 
-## Complete after access is restored
+## Maintenance
 
-1. Create public `SOLARIS-JHU/FE-OC-website`, initialized with default branch `main`.
-2. Upload this package using the connected GitHub API; enable Pages with GitHub Actions.
-3. Verify both build and deployment jobs succeed; record their URL and commit SHA here.
-4. Visit the actual Pages URL; test desktop, 390px and 320px layouts, resource links, equation/figure scrolling, image fidelity, focus order, native disclosures, citation copying and console errors.
-5. Update README and this record to the verified deployment status only after the above succeeds.
+Keep the paper/code pins, source map and asset provenance synchronized with intentional scientific edits. Changes to `main` rerun validation, browser checks, Pages deployment and live verification. Record material new findings here; a successful commit alone does not establish a successful deployment.

@@ -14,7 +14,8 @@ const { values: options } = parseArgs({ options: {
   serve: { type: 'string' }, url: { type: 'string' },
   'base-path': { type: 'string', default: '/FE-OC-website/' },
   'expected-file': { type: 'string', default: 'index.html' },
-  'report-dir': { type: 'string', default: '.qa-tmp/browser' }
+  'report-dir': { type: 'string', default: '.qa-tmp/browser' },
+  'emit-preview': { type: 'boolean', default: false }
 } });
 const out = path.resolve(options['report-dir']);
 const report = {
@@ -89,6 +90,14 @@ async function runCase(browser, target, configuration) {
     const filename = `${configuration.name}-${suffix}.png`;
     await page.screenshot({ path: path.join(out, filename), fullPage: true });
     result.screenshots.push(filename);
+    // Public-page previews can be inspected through Actions logs when artifact
+    // downloads are unavailable to a reviewer. No browser storage is captured.
+    if (options['emit-preview'] && suffix === 'initial' && ['desktop', 'mobile-390'].includes(configuration.name)) {
+      const previewName = `${configuration.name}-preview.jpg`;
+      const bytes = await page.screenshot({ path: path.join(out, previewName), fullPage: true, type: 'jpeg', quality: 55 });
+      const encoded = bytes.toString('base64');
+      for (let offset = 0; offset < encoded.length; offset += 4096) console.log(`FEOC_PREVIEW ${previewName} ${offset / 4096} ${encoded.slice(offset, offset + 4096)}`);
+    }
   }
   try {
     const loaded = await check('Page and rendered mathematics load', async () => {

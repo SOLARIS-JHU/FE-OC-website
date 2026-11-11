@@ -77,7 +77,7 @@ jobs:
       - name: Verify the published site in Chromium
         env:
           PAGES_URL: ${{ steps.deployment.outputs.page_url }}
-        run: node scripts/browser_qa.cjs --url "$PAGES_URL" --expected-file index.html --report-dir .qa-tmp/browser-live
+        run: node scripts/browser_qa.cjs --url "$PAGES_URL" --expected-file index.html --report-dir .qa-tmp/browser-live --emit-preview
       - name: Save live browser reports and screenshots
         if: always()
         uses: actions/upload-artifact@v4
