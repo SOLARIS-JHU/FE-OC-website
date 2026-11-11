@@ -75,6 +75,13 @@ Batch sizes for an inference timing benchmark, CPU model, seed variability, conf
 8. **Paper assets:** full text/appendix and figure captions were readable; downloadable arXiv image/PDF bytes were unavailable to the local executor. Use the exact official SOLARIS vector abstract and an explicitly labelled replot of published table means. Do not claim the new chart is an original paper figure. Link the full paper for original experimental trajectories.
 9. **Publication metadata:** official IEEE page couldn't be read past robot verification. ACC acceptance is author-verified; page numbers are only independently indexed by DBLP. Citation explicitly uses arXiv v2. Older UCLA mirror's first-author spelling is not copied.
 
+## Presentation revision, 11 November 2026
+
+- The primary **Paper** button points to the IEEE American Control Conference publication record at `https://ieeexplore.ieee.org/document/11615530`; arXiv remains separately available. The official URL is corroborated by the DBLP electronic-edition link. The IEEE robot check still prevents retrieving its metadata, so no unverified DOI has been introduced.
+- The new animated overview retains Algorithm 1's alternating coefficient solve and gradient update, its reconstruction and basis-norm loss, Algorithm 2's separate coefficient-target operator fitting, both online inference routes and state feedback. Fixed bases enter both coefficient estimation and policy evaluation; the trained operator is reused for parameter-based inference. Animation denotes computational operations, not measured system trajectories or benchmark timings.
+- Feedback equations are generated from LaTeX with KaTeX using the paper's vector state/control, basis and coefficient notation. Public captions describe the method; production notes, source-access failures and auditing history remain in these maintenance documents.
+- Defined technical abbreviations: American Control Conference (ACC), University of California, Los Angeles (UCLA), Institute of Electrical and Electronics Engineers (IEEE), function encoder (FE), least squares (LS), two-dimensional (2D), graphics processing unit (GPU), and adaptive moment estimation (Adam). FE–LS and FE–operator are explained before the results. Institutional/project/software brand names retain their official names.
+
 ## Maintenance rules
 
 Update the paper version, code commit, claims, data, provenance and metadata together. Keep scientific tables primary when prose conflicts with them, flag conflicts, and do not upgrade empirical results into guarantees. Never relabel the current conceptual graphic or table replot as measured trajectories. Run validation before deployment. Record a successful Pages run and verify the actual live site before reporting publication.

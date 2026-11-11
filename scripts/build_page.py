@@ -20,6 +20,8 @@ AUTHORS = [
  ('Ján Drgoňa','4','https://drgona.github.io/')
 ]
 BIB = (ROOT/'citation.bib').read_text(encoding='utf-8').strip()
+ABSTRACT = (ROOT/'assets/figures/graphical-abstract-animated.svg').read_text(encoding='utf-8').replace('data-paused="false"', 'data-paused="true"', 1)
+FEEDBACK = (ROOT/'assets/figures/feedback-fragment.html').read_text(encoding='utf-8')
 author_html = '\n'.join(f'<span class="author"><a href="{url}">{name}</a><sup>{aff}</sup></span>' for name,aff,url in AUTHORS)
 author_meta = '\n'.join(f'<meta name="citation_author" content="{name}">' for name,_,_ in AUTHORS)
 structured = json.dumps({
@@ -66,14 +68,15 @@ __AUTHOR_META__
 <header class="hero">
  <div class="wrap">
   <div class="hero-head">
-   <p class="eyebrow"><a class="pill" href="https://solaris-jhu.github.io/solaris-website/">SOLARIS</a> American Control Conference · 2026</p>
+   <p class="eyebrow"><a class="pill" href="https://solaris-jhu.github.io/solaris-website/">SOLARIS</a> American Control Conference (ACC) · 2026</p>
    <h1>Zero-Shot Transferable Solution Method<br class="desktop-break"> for Parametric Optimal Control Problems</h1>
    <div class="authors">__AUTHORS__</div>
    <p class="affiliations"><sup>1</sup> Oden Institute, The University of Texas at Austin<br>
-   <sup>2</sup> Department of Mathematics, UCLA &nbsp;·&nbsp; <sup>3</sup> Department of Mathematical and Statistical Sciences, Clemson University<br>
+   <sup>2</sup> Department of Mathematics, University of California, Los Angeles (UCLA)<br><sup>3</sup> Department of Mathematical and Statistical Sciences, Clemson University<br>
    <sup>4</sup> Department of Civil and Systems Engineering, Johns Hopkins University</p>
    <nav class="buttons" aria-label="Paper resources">
-    <a class="btn btn-primary" href="https://arxiv.org/abs/2509.18404">arXiv ↗</a>
+    <a class="btn btn-primary" href="https://ieeexplore.ieee.org/document/11615530" title="Published paper in the Institute of Electrical and Electronics Engineers (IEEE) Xplore library">Paper ↗</a>
+    <a class="btn" href="https://arxiv.org/abs/2509.18404">arXiv ↗</a>
     <a class="btn" href="https://github.com/XJ-LI/FE_OC">Code ↗</a>
     <a class="btn" href="#citation">BibTeX</a>
    </nav>
@@ -81,13 +84,15 @@ __AUTHOR_META__
   <div class="opening"><p class="summary"><strong>Learn a shared control-policy basis. Adapt its coefficients to a new objective.</strong><br>
   Function encoders separate offline imitation learning from task adaptation, enabling feedback policies to transfer without retraining their neural bases.</p></div>
   <figure class="overview-figure">
-   <a class="figure-link" href="assets/figures/graphical-abstract.svg" aria-label="Open the full-size graphical abstract"><img src="assets/figures/graphical-abstract.svg" width="760" height="392" alt="Offline demonstrations train shared policy basis functions. At deployment, least squares uses new task demonstrations or an optional operator maps task parameters to coefficients. The coefficients combine the fixed bases into a task-specific policy."></a>
-   <figcaption>Shared bases, task-specific coefficients. The SOLARIS graphical abstract illustrates the two transfer routes in Section III; its \(\pi_\eta\) denotes the paper’s task-specific policy \(\mathbf u_{\boldsymbol\theta}\). Curves are conceptual, not experimental trajectories. <span class="mobile-figure-hint">Scroll the figure horizontally or open it at full size.</span></figcaption>
+   <div class="abstract-scroll" tabindex="0" role="region" aria-label="Animated overview of function encoder training and transfer">__ANIMATED_ABSTRACT__</div>
+   <div class="figure-controls"><button class="btn" id="toggle-abstract" type="button" aria-pressed="false" aria-controls="feoc-abstract" hidden>Pause animation</button><a href="assets/figures/overview.html">Open full-size overview</a></div>
+   <figcaption>Learn shared policy bases from training tasks, then infer new-task coefficients from demonstrations or task parameters. The learned bases remain fixed during deployment.<span class="mobile-figure-hint">Scroll horizontally to follow every stage.</span></figcaption>
   </figure>
   <div class="logos">
    <a href="https://solaris-jhu.github.io/solaris-website/"><img class="square" src="assets/logos/solaris.png" width="500" height="500" alt="SOLARIS Lab"></a>
    <a href="https://engineering.jhu.edu/"><img src="assets/logos/jhu-whiting.svg" width="280" height="70" alt="Johns Hopkins Whiting School of Engineering"></a>
    <a href="https://oden.utexas.edu/"><img src="assets/logos/ut-austin.svg" width="280" height="70" alt="The University of Texas at Austin"></a>
+   <a href="https://www.ucla.edu/"><img class="ucla-logo" src="assets/logos/ucla.svg" width="360" height="169" alt="University of California, Los Angeles"></a>
   </div>
  </div>
 </header>
@@ -107,7 +112,7 @@ __AUTHOR_META__
   <div><span class="num">2</span><h3>Two transfer routes</h3><p>Infer coefficients by least squares (LS) from task data, or with an optional learned parameter-to-coefficient operator.</p></div>
   <div><span class="num">3</span><h3>Feedback across initial states</h3><p>Evaluate a state-and-time policy repeatedly in a rollout, tested on new initial conditions and objectives.</p></div>
  </div>
- <p class="source-note">Formulation: Section II, Eqs. (1)–(3). Contributions: Sections I and III. Scientific content follows <a href="https://arxiv.org/abs/2509.18404v2">arXiv v2, 11 March 2026</a>.</p>
+ <p class="source-note">Problem formulation: <a href="https://arxiv.org/abs/2509.18404v2">Section II, Equations (1)–(3)</a>.</p>
 </div></section>
 <section id="method" class="alt"><div class="wrap wrap-narrow">
  <h2>Learn the bases offline. Infer the coefficients online.</h2>
@@ -119,7 +124,7 @@ __AUTHOR_META__
   <h3>Fit a common control space</h3>
   <p>Collect state–time–control demonstrations \(\mathcal D_{S_k}\) for each training task, using numerical optimal control solvers or existing policies. For the current bases, solve for each task’s LS coefficients. Then update the basis parameters by gradient descent on reconstruction error plus basis-norm regularization. Repeat these steps during training.</p>
   <div class="math">$$C(\mathbf c,\mathcal D)=\frac{1}{M}\sum_{i=1}^{M}\left\|\mathbf u_i-\sum_{j=1}^{p}c_j\phi_j(\mathbf x_i,t_i)\right\|_2^2.$$</div>
-  <p class="detail">Algorithm 1 adds \(\lambda\sum_j\|\phi_j\|_{\mathcal H}^2\) to the reconstruction loss. The implementation uses the FunctionEncoder library; Section II also describes Tikhonov regularization for numerical stability of the coefficient solve.</p>
+  <p class="detail">Here \(M\) is the number of demonstration samples. Algorithm 1 adds \(\lambda\sum_j\|\phi_j\|_{\mathcal H}^2\) to the reconstruction loss, with regularization weight \(\lambda\). Tikhonov regularization improves numerical stability of the coefficient solve.</p>
  </div>
  <div class="method-step">
   <div class="step-label"><span>02</span><span>Optional offline stage · operator learning</span></div>
@@ -140,19 +145,19 @@ __AUTHOR_META__
   <div class="step-label"><span>04</span><span>Online · state feedback</span></div>
   <h3>Evaluate, apply control, observe the next state</h3>
   <p>At each rollout step, the current state and time enter the fixed bases. Combine their outputs with the inferred coefficients, apply the resulting control to the dynamics, and feed the updated state into the next policy evaluation. The coefficients describe the task; the basis evaluations respond to the changing state.</p>
-  <figure class="figure feedback-figure"><a class="figure-link" href="assets/figures/feedback.svg" aria-label="Open the feedback diagram at full size"><img src="assets/figures/feedback.svg" width="1000" height="310" alt="Current state and time enter fixed policy basis functions. Task coefficients weight the basis outputs to produce control. The dynamical system evolves, returning its state to the policy in a closed feedback loop."></a><figcaption>Deployment structure from Eq. (7) and the released rollout scripts. The diagram is a static explanation of the feedback computation.<span class="mobile-figure-hint">Scroll the diagram horizontally or open it at full size.</span></figcaption></figure>
+  <figure class="figure feedback-figure"><div class="feedback-scroll" tabindex="0" role="region" aria-label="State feedback with fixed policy bases">__FEEDBACK_DIAGRAM__</div><figcaption>Task coefficients remain fixed while the observed state changes.<span class="mobile-figure-hint">Scroll horizontally or <a href="assets/figures/feedback.html">open the full-size feedback diagram</a>.</span></figcaption></figure>
  </div>
- <p class="source-note">Method: Eq. (7), Eq. (8), Algorithms 1–2 and Section III. The operator coefficient-target loss shown here follows Algorithm 2 and the released training code; the adjacent paper prose describes it differently.</p>
+ <p class="source-note">Method: Equations (7)–(8) and Algorithms 1–2.</p>
 </div></section>
 <section id="results"><div class="wrap wrap-narrow">
  <h2>Transfer across targets and obstacle costs</h2>
- <p>Three simulated problem families test the learned policies against discretization-based numerical optimal control solutions. The paper reports experiments on an NVIDIA A100 GPU. The values below are reported means, in the paper’s objective units; no confidence intervals or variability across training seeds are supplied.</p>
- <figure class="figure"><a class="figure-link" href="assets/figures/objective-comparison.svg" aria-label="Open full-size objective comparison"><img src="assets/figures/objective-comparison.svg" width="1000" height="480" alt="Relative increases in mean objective from Tables I and II. New 2D interpolation: LS 0.65 percent, operator 2.66 percent; extrapolation: LS 4.04 percent, operator 9.09 percent. New quadcopter targets: LS 0.44 percent, operator 7.38 percent."></a><figcaption>Replot of published means from Tables I–II, not a new experiment. Each percentage is \(100(\bar J_{\rm FE}/\bar J_{\rm ref}-1)\), computed from the rounded table entries. It is a ratio of means, not a mean of per-trajectory errors. No uncertainty bars are available. <span class="mobile-figure-hint">Scroll horizontally to read the figure at full size.</span></figcaption></figure>
+ <p>Three simulated problem families—two-dimensional (2D) path planning, quadcopter control, and bicycle control—test the learned policies against discretization-based numerical optimal control solutions. Experiments use an NVIDIA A100 graphics processing unit (GPU). Function encoder transfer with least-squares coefficients is labeled FE–LS; FE–operator uses the learned coefficient network. Values are reported means in the paper's objective units; confidence intervals and variability across training seeds are not reported.</p>
+ <figure class="figure"><a class="figure-link" href="assets/figures/objective-comparison.svg" aria-label="Open full-size objective comparison"><img src="assets/figures/objective-comparison.svg" width="1000" height="480" alt="Relative increases in mean objective from Tables I and II. New 2D interpolation: LS 0.65 percent, operator 2.66 percent; extrapolation: LS 4.04 percent, operator 9.09 percent. New quadcopter targets: LS 0.44 percent, operator 7.38 percent."></a><figcaption>Relative increase in mean objective: \(100(\bar J_{\rm FE}/\bar J_{\rm ref}-1)\), computed from the published means in Tables I–II. These are ratios of rounded means; per-trajectory error distributions and uncertainty estimates are not reported.<span class="mobile-figure-hint">Scroll horizontally to read the figure at full size.</span></figcaption></figure>
  <h3 id="path-planning">2D path planning: new destinations</h3>
  <p>A planar integrator \(\dot{\mathbf x}=\mathbf u\) navigates a Gaussian obstacle cost. Sixteen target locations form the training set, with 200 numerically solved trajectories per target. The horizon is \(T=1\), discretized into 20 steps. Tests include seen targets, new interpolated targets, and extrapolation, all with new initial states.</p>
  __TABLE1__
  <p class="detail">The paper’s objective combines control effort, a Gaussian obstacle penalty, and quadratic terminal cost. Its published means average over target states and initial conditions. The released LS evaluation script samples 500 state–time–control points from 40 trajectories per task for coefficient inference, then evaluates those 40 initial states.</p>
- <details><summary>Training setup and source qualifications</summary><p>Section V-A specifies 100 bases, a four-layer multilayer perceptron with hidden width 256, Adam at learning rate 0.001, and 20,000 training steps. The paper’s prose states that errors are below 4% across test cases, but Table I gives larger relative differences for extrapolation, especially for the operator. This page uses the table values without that blanket claim.</p><p>The released 2D evaluation script accumulates control norms, whereas the paper specifies squared control norms. Table I is reproduced from the paper; these values have not been independently reproduced from that script.</p></details>
+ <details><summary>Training setup and objective</summary><p>Training uses 100 bases, a four-layer multilayer perceptron with hidden width 256, adaptive moment estimation (Adam) at learning rate 0.001, and 20,000 training steps.</p><p>The reported objective uses squared control norms. The released 2D evaluation script accumulates unsquared control norms, so its cost calculation differs from the paper's formulation.</p></details>
  <h3 id="quadcopter">Quadcopter: nonlinear dynamics in 12 states</h3>
  <p>The quadcopter has 12 states and four control inputs: thrust and three torques. Training uses 64 target locations with 80 trajectories per target. Testing introduces 27 new targets, each with 25 trajectories. The horizon is \(T=2\), with 50 integration steps.</p>
  __TABLE2__
@@ -162,7 +167,7 @@ __AUTHOR_META__
  <p>A nonlinear bicycle model changes its route as one or two Gaussian obstacle penalties vary. This experiment uses LS transfer only. The single-obstacle study has 144 training and 36 test configurations. The double-obstacle study splits 576 configurations into 544 for training and 32 for testing. Each configuration has 100 trajectories; the horizon is \(T=5\).</p>
  __TABLE3__
  <p class="detail">Table III averages over unseen configurations. Terminal position deviation is the reported position-error metric; the released evaluation code computes squared Euclidean error in \(x,y\). The LS scripts use 50 trajectories to estimate coefficients and evaluate the other 50. The obstacle is a smooth cost penalty, so these results do not establish collision-free operation.</p>
- <p class="source-note">Results: Section V-A / Table I; Section V-B / Table II; Section V-C / Table III. Numerical references are produced with SciPy or CasADi. The paper provides no end-to-end timing table, inference batch-size benchmark, or repeated-run statistics; no runtime or speedup claim is made here.</p>
+ <p class="source-note">Results: Tables I–III. Numerical references use SciPy or CasADi. The paper provides no end-to-end timing table, inference batch-size benchmark, or repeated-run statistics.</p>
 </div></section>
 <section id="scope" class="alt"><div class="wrap wrap-narrow">
  <h2>What the results establish—and their scope</h2>
@@ -180,10 +185,9 @@ __AUTHOR_META__
   <a class="resource-card" href="https://arxiv.org/abs/2509.18404v2"><strong>Full paper and appendix <span aria-hidden="true">↗</span></strong><span>Version 2 · 11 March 2026 · open access</span></a>
   <a class="resource-card" href="https://github.com/XJ-LI/FE_OC"><strong>Research code <span aria-hidden="true">↗</span></strong><span>PyTorch implementation, evaluation scripts, and pretrained models</span></a>
   <a class="resource-card" href="https://github.com/XJ-LI/FE_OC/tree/65337fde9b540b3ecb8f4f4b0771ad1efae71f6a/2D_toy_control/Dataset"><strong>Released trajectory data <span aria-hidden="true">↗</span></strong><span>2D datasets; quadcopter datasets are also included in the repository</span></a>
-  <a class="resource-card" href="https://ieeexplore.ieee.org/document/11615530"><strong>ACC publication record <span aria-hidden="true">↗</span></strong><span>IEEE Xplore record linked by the bibliographic index</span></a>
+  <a class="resource-card" href="https://ieeexplore.ieee.org/document/11615530"><strong>Published paper · ACC 2026 <span aria-hidden="true">↗</span></strong><span>Institute of Electrical and Electronics Engineers (IEEE) Xplore</span></a>
  </div>
- <p class="source-note">Code inspected at <a href="https://github.com/XJ-LI/FE_OC/tree/65337fde9b540b3ecb8f4f4b0771ad1efae71f6a">commit 65337fd</a>. The bicycle scripts refer to separately hosted datasets; their downloads were not verified. The repository README lists FunctionEncoder 0.1.1 and PyTorch 2.8.0. Reproduction requires checking those dependencies and the documented data paths.</p>
- <p class="source-note">ACC 2026 acceptance is confirmed by the <a href="https://drgona.github.io/news/">authors’ announcement</a>; the <a href="https://dblp.org/rec/conf/amcc/LiKVKOD26.html?view=bibtex">bibliographic record</a> lists pages 2003–2010. IEEE blocks automated metadata retrieval, so this page’s citation identifies the verified arXiv revision rather than asserting an unverified conference DOI.</p>
+ <p class="source-note">Reproducible implementation: <a href="https://github.com/XJ-LI/FE_OC/tree/65337fde9b540b3ecb8f4f4b0771ad1efae71f6a">research code version 65337fd</a>, with FunctionEncoder 0.1.1 and PyTorch 2.8.0. The bicycle examples use separately hosted datasets linked from the code.</p>
 </div></section>
 <section id="citation" class="alt"><div class="wrap wrap-narrow">
  <h2>Cite the paper</h2><p>BibTeX for the arXiv revision summarized on this page.</p>
@@ -194,10 +198,21 @@ __AUTHOR_META__
 <footer><div class="wrap"><p><a href="https://solaris-jhu.github.io/solaris-website/">SOLARIS Lab</a> · Johns Hopkins University<br>Website foundation adapted from <a href="https://solaris-jhu.github.io/TQPNet/">TQPNet</a> under the Apache License 2.0. <a href="NOTICE">Attribution and asset notices</a>.</p></div></footer>
 </body></html>
 '''
-replacements = {'__TITLE__':TITLE,'__URL__':URL,'__DESCRIPTION__':DESCRIPTION,'__AUTHORS__':author_html,'__AUTHOR_META__':author_meta,'__SCHEMA__':structured,'__BIB__':html.escape(BIB),
+replacements = {'__TITLE__':TITLE,'__URL__':URL,'__DESCRIPTION__':DESCRIPTION,'__AUTHORS__':author_html,'__AUTHOR_META__':author_meta,'__SCHEMA__':structured,'__BIB__':html.escape(BIB),'__ANIMATED_ABSTRACT__':ABSTRACT,'__FEEDBACK_DIAGRAM__':FEEDBACK,
  '__TABLE1__':table('table1',['Evaluation','Numerical reference','FE–LS','FE–operator'],'Table I · mean objective, 2D path planning'),
  '__TABLE2__':table('table2',['Evaluation','Numerical reference','FE–LS','FE–operator'],'Table II · mean objective, quadcopter'),
  '__TABLE3__':table('table3',['Setting','Method','Control cost','Obstacle cost','Terminal position deviation'],'Table III · bicycle, means on unseen configurations')}
 for key,value in replacements.items(): page=page.replace(key,value)
 (ROOT/'index.html').write_text(page,encoding='utf-8')
+overview = '''<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Function encoder training and transfer | SOLARIS</title>
+<link rel="stylesheet" href="../fonts/fonts.css"><link rel="stylesheet" href="../../template.css"><link rel="stylesheet" href="../../style.css">
+<script defer src="../../site.js"></script></head><body><main class="wrap" style="padding-block:2rem">
+<p><a href="../../">Return to the research page</a></p><h1>Learn shared bases. Transfer to new objectives.</h1>
+<figure class="overview-figure"><div class="abstract-scroll" tabindex="0" role="region" aria-label="Function encoder training and transfer">'''+ABSTRACT+'''</div>
+<div class="figure-controls"><button class="btn" id="toggle-abstract" type="button" aria-pressed="false" aria-controls="feoc-abstract" hidden>Pause animation</button></div>
+<figcaption>Training learns shared policy bases; new-task inference changes the coefficients while keeping those bases fixed.</figcaption></figure>
+</main></body></html>'''
+(ROOT/'assets/figures/overview.html').write_text(overview,encoding='utf-8')
 print('Built index.html from audited content and table data.')

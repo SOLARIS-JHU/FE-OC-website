@@ -34,7 +34,7 @@
 <header class="hero">
  <div class="wrap">
   <div class="hero-head">
-   <p class="eyebrow"><a class="pill" href="https://solaris-jhu.github.io/solaris-website/">SOLARIS</a> American Control Conference · 2026</p>
+   <p class="eyebrow"><a class="pill" href="https://solaris-jhu.github.io/solaris-website/">SOLARIS</a> American Control Conference (ACC) · 2026</p>
    <h1>Zero-Shot Transferable Solution Method<br class="desktop-break"> for Parametric Optimal Control Problems</h1>
    <div class="authors"><span class="author"><a href="https://oden.utexas.edu/people/directory/Xingjian-Li/">Xingjian Li</a><sup>1</sup></span>
 <span class="author"><a href="https://www.math.ucla.edu/~kelvin.kan/home.html">Kelvin Kan</a><sup>2</sup></span>
@@ -43,10 +43,11 @@
 <span class="author"><a href="https://math.ucla.edu/~sjo/">Stanley Osher</a><sup>2</sup></span>
 <span class="author"><a href="https://drgona.github.io/">Ján Drgoňa</a><sup>4</sup></span></div>
    <p class="affiliations"><sup>1</sup> Oden Institute, The University of Texas at Austin<br>
-   <sup>2</sup> Department of Mathematics, UCLA &nbsp;·&nbsp; <sup>3</sup> Department of Mathematical and Statistical Sciences, Clemson University<br>
+   <sup>2</sup> Department of Mathematics, University of California, Los Angeles (UCLA)<br><sup>3</sup> Department of Mathematical and Statistical Sciences, Clemson University<br>
    <sup>4</sup> Department of Civil and Systems Engineering, Johns Hopkins University</p>
    <nav class="buttons" aria-label="Paper resources">
-    <a class="btn btn-primary" href="https://arxiv.org/abs/2509.18404">arXiv ↗</a>
+    <a class="btn btn-primary" href="https://ieeexplore.ieee.org/document/11615530" title="Published paper in the Institute of Electrical and Electronics Engineers (IEEE) Xplore library">Paper ↗</a>
+    <a class="btn" href="https://arxiv.org/abs/2509.18404">arXiv ↗</a>
     <a class="btn" href="https://github.com/XJ-LI/FE_OC">Code ↗</a>
     <a class="btn" href="#citation">BibTeX</a>
    </nav>
@@ -54,13 +55,126 @@
   <div class="opening"><p class="summary"><strong>Learn a shared control-policy basis. Adapt its coefficients to a new objective.</strong><br>
   Function encoders separate offline imitation learning from task adaptation, enabling feedback policies to transfer without retraining their neural bases.</p></div>
   <figure class="overview-figure">
-   <a class="figure-link" href="assets/figures/graphical-abstract.svg" aria-label="Open the full-size graphical abstract"><img src="assets/figures/graphical-abstract.svg" width="760" height="392" alt="Offline demonstrations train shared policy basis functions. At deployment, least squares uses new task demonstrations or an optional operator maps task parameters to coefficients. The coefficients combine the fixed bases into a task-specific policy."></a>
-   <figcaption>Shared bases, task-specific coefficients. The SOLARIS graphical abstract illustrates the two transfer routes in Section III; its \(\pi_\eta\) denotes the paper’s task-specific policy \(\mathbf u_{\boldsymbol\theta}\). Curves are conceptual, not experimental trajectories. <span class="mobile-figure-hint">Scroll the figure horizontally or open it at full size.</span></figcaption>
+   <div class="abstract-scroll" tabindex="0" role="region" aria-label="Animated overview of function encoder training and transfer"><svg xmlns="http://www.w3.org/2000/svg" id="feoc-abstract" class="feoc-abstract" viewBox="0 0 1080 650" font-family="Arial,Helvetica,sans-serif" role="img" aria-labelledby="fa-title fa-description" data-paused="true">
+<title id="fa-title">Function encoder policies: offline learning and online transfer</title>
+<desc id="fa-description">Training demonstrations support alternating least-squares coefficient solves and gradient updates of shared neural bases, using reconstruction loss and a basis-norm penalty. An optional operator is trained on task specifications and coefficient targets after freezing the bases. The frozen bases transfer to both the online least-squares solve and the feedback policy; the trained operator transfers to online coefficient inference. For a new task, either demonstrations and least squares or a task specification and the trained operator produce coefficients. The coefficients combine fixed bases into a feedback policy; applied controls evolve the system and its next state and time return to the policy.</desc>
+<style>
+.feoc-abstract { display:block; width:100%; height:auto; font-family:Arial,Helvetica,sans-serif; }
+.feoc-abstract .fa-panel { fill:#f7f9fc; stroke:#d8e2ed; stroke-width:1.2; }
+.feoc-abstract .fa-online-panel { fill:#f6faf9; }
+.feoc-abstract .fa-node { fill:#fff; stroke:#b9cada; stroke-width:1.4; }
+.feoc-abstract .fa-operator { fill:#edf8f5; stroke:#9fcfc5; stroke-width:1.4; }
+.feoc-abstract .fa-policy { fill:#eaf2fc; stroke:#8faecf; stroke-width:1.4; }
+.feoc-abstract .fa-wire { fill:none; stroke:#7b95b1; stroke-width:2.1; stroke-linejoin:round; }
+.feoc-abstract .fa-repeat { fill:none; stroke:#85719b; stroke-width:2.1; stroke-linejoin:round; }
+.feoc-abstract .fa-frozen { fill:none; stroke:#002d72; stroke-width:2.1; stroke-linejoin:round; }
+.feoc-abstract .fa-operator-transfer { fill:none; stroke:#4f8e87; stroke-width:2.1; stroke-linejoin:round; stroke-dasharray:6 5; }
+.feoc-abstract .fa-flow { fill:none; stroke:#007e79; stroke-width:4; stroke-linecap:round; stroke-linejoin:round; stroke-dasharray:2 22; opacity:0; }
+.feoc-abstract .fa-learning { stroke:#6c4a8c; }
+.feoc-abstract .fa-feedback { stroke:#002d72; }
+.feoc-abstract .fa-stage-label { letter-spacing:1.1px; }
+
+@keyframes fa-travel { to { stroke-dashoffset:-48; } }
+@keyframes fa-training { 0%,42% { opacity:1; } 47%,100% { opacity:0; } }
+@keyframes fa-operator-fit { 0%,34% { opacity:0; } 38%,46% { opacity:1; } 49%,100% { opacity:0; } }
+@keyframes fa-data-inference { 0%,48% { opacity:0; } 51%,59% { opacity:1; } 63%,100% { opacity:0; } }
+@keyframes fa-parameter-inference { 0%,72% { opacity:0; } 75%,83% { opacity:1; } 87%,100% { opacity:0; } }
+@keyframes fa-feedback-steps { 0%,55% { opacity:0; } 58%,98% { opacity:1; } 100% { opacity:0; } }
+@keyframes fa-gradient-step { 0%,8%,20%,32%,44%,100% { fill:#fff; stroke:#b9cada; } 12%,24%,36% { fill:#e5d7f0; stroke:#6c4a8c; } }
+.feoc-abstract .fa-training-flow { animation:fa-travel 1.1s linear infinite,fa-training 12s linear infinite; }
+.feoc-abstract .fa-learning { animation:fa-travel 1.1s linear infinite,fa-training 12s linear infinite; }
+.feoc-abstract .fa-operator-fit { animation:fa-travel 1.1s linear infinite,fa-operator-fit 12s linear infinite; }
+.feoc-abstract .fa-data-inference { animation:fa-travel 1.1s linear infinite,fa-data-inference 12s linear infinite; }
+.feoc-abstract .fa-parameter-inference { animation:fa-travel 1.1s linear infinite,fa-parameter-inference 12s linear infinite; }
+.feoc-abstract .fa-feedback { animation:fa-travel 1.1s linear infinite,fa-feedback-steps 12s linear infinite; }
+.feoc-abstract .fa-update { animation:fa-gradient-step 12s linear infinite; }
+.feoc-abstract[data-paused="true"] *, .feoc-abstract[data-paused="true"] { animation-play-state:paused!important; }
+@media(prefers-reduced-motion:reduce) {
+  .feoc-abstract *, .feoc-abstract { animation:none!important; }
+  .feoc-abstract .fa-flow { opacity:0!important; }
+}
+</style>
+<defs><marker id="fa-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#7b95b1"/></marker><marker id="fa-purple-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#85719b"/></marker><marker id="fa-blue-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#002d72"/></marker><marker id="fa-teal-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#4f8e87"/></marker></defs>
+<rect width="1080" height="650" rx="16" fill="#fff"/>
+<rect class="fa-panel" x="18" y="18" width="1044" height="268" rx="16" fill="#f7f9fc" stroke="#d8e2ed" stroke-width="1.2"/>
+<rect class="fa-panel fa-online-panel" x="18" y="306" width="1044" height="326" rx="16" fill="#f6faf9" stroke="#d8e2ed" stroke-width="1.2"/>
+<text x="40" y="48" text-anchor="start" font-size="17" fill="#002d72" font-weight="700">OFFLINE  ·  LEARN A REUSABLE CONTROL BASIS</text>
+<text x="40" y="337" text-anchor="start" font-size="17" fill="#002d72" font-weight="700">ONLINE  ·  ADAPT TO A NEW OBJECTIVE</text>
+<rect class="fa-node" x="40" y="106" width="180" height="84" rx="12" fill="#fff" stroke="#b9cada" stroke-width="1.4"/>
+<rect class="fa-node" x="265" y="106" width="190" height="84" rx="12" fill="#fff" stroke="#b9cada" stroke-width="1.4"/>
+<rect class="fa-node fa-update" x="510" y="106" width="225" height="84" rx="12" fill="#fff" stroke="#b9cada" stroke-width="1.4"/>
+<rect class="fa-operator" x="815" y="106" width="220" height="84" rx="12" fill="#edf8f5" stroke="#9fcfc5" stroke-width="1.4"/>
+<text x="130" y="133" text-anchor="middle" font-size="18" fill="#002d72" font-weight="700">Training</text>
+<text x="130" y="155" text-anchor="middle" font-size="18" fill="#002d72" font-weight="700">demonstrations</text>
+<text x="130" y="177" text-anchor="middle" font-size="14" fill="#53677e" font-weight="500">state · time · control</text>
+<text x="360" y="137" text-anchor="middle" font-size="18" fill="#002d72" font-weight="700">Least-squares solve</text>
+<text x="360" y="164" text-anchor="middle" font-size="15" fill="#53677e" font-weight="500">Task coefficients</text>
+<text x="622.5" y="129" text-anchor="middle" font-size="18" fill="#002d72" font-weight="700">Update neural bases</text>
+<text x="622.5" y="150" text-anchor="middle" font-size="14" fill="#53677e" font-weight="500">Reconstruction loss</text>
+<text x="622.5" y="168" text-anchor="middle" font-size="14" fill="#53677e" font-weight="500">+ basis-norm penalty</text>
+<text x="925" y="133" text-anchor="middle" font-size="18" fill="#002d72" font-weight="700">Optional operator</text>
+<text x="925" y="155" text-anchor="middle" font-size="14" fill="#53677e" font-weight="500">Fit task parameters to</text>
+<text x="925" y="174" text-anchor="middle" font-size="14" fill="#53677e" font-weight="500">coefficient targets</text>
+<path class="fa-wire" d="M220 148H265" fill="none" stroke="#7b95b1" stroke-width="2.1" stroke-linejoin="round" marker-end="url(#fa-arrow)"/>
+<path class="fa-wire" d="M455 148H510" fill="none" stroke="#7b95b1" stroke-width="2.1" stroke-linejoin="round" marker-end="url(#fa-arrow)"/>
+<path class="fa-repeat" d="M622.5 190V229H360V190" fill="none" stroke="#85719b" stroke-width="2.1" stroke-linejoin="round" marker-end="url(#fa-purple-arrow)"/>
+<text x="490" y="252" text-anchor="middle" font-size="14" fill="#6c4a8c" font-weight="500">Recompute coefficients after each gradient step</text>
+<path class="fa-wire" d="M360 106V80H925V106" fill="none" stroke="#7b95b1" stroke-width="2.1" stroke-linejoin="round" marker-end="url(#fa-arrow)"/>
+<text x="686" y="72" text-anchor="middle" font-size="14" fill="#53677e" font-weight="500">Coefficient targets; bases frozen</text>
+<text x="925" y="215" text-anchor="middle" font-size="14" fill="#53677e" font-weight="500">Train separately after</text>
+<text x="925" y="235" text-anchor="middle" font-size="14" fill="#53677e" font-weight="500">the shared bases are learned</text>
+<path class="fa-frozen" d="M735 148H774V365H360V391" fill="none" stroke="#002d72" stroke-width="2.1" stroke-linejoin="round" marker-end="url(#fa-blue-arrow)"/>
+<path class="fa-frozen" d="M645 365V426" fill="none" stroke="#002d72" stroke-width="2.1" stroke-linejoin="round" marker-end="url(#fa-blue-arrow)"/>
+<text x="659" y="355" text-anchor="start" font-size="15" fill="#002d72" font-weight="700">Frozen bases</text>
+<path class="fa-operator-transfer" d="M1035 148H1047V620H360V566" fill="none" stroke="#4f8e87" stroke-width="2.1" stroke-linejoin="round" stroke-dasharray="6 5" marker-end="url(#fa-teal-arrow)"/>
+<text x="450" y="610" text-anchor="start" font-size="14" fill="#397a73" font-weight="700">Frozen operator</text>
+<rect class="fa-node" x="40" y="391" width="185" height="64" rx="12" fill="#fff" stroke="#b9cada" stroke-width="1.4"/>
+<rect class="fa-node" x="265" y="391" width="190" height="64" rx="12" fill="#fff" stroke="#b9cada" stroke-width="1.4"/>
+<rect class="fa-node" x="40" y="502" width="185" height="64" rx="12" fill="#fff" stroke="#b9cada" stroke-width="1.4"/>
+<rect class="fa-operator" x="265" y="502" width="190" height="64" rx="12" fill="#edf8f5" stroke="#9fcfc5" stroke-width="1.4"/>
+<text x="132.5" y="416" text-anchor="middle" font-size="17" fill="#002d72" font-weight="700">New-task</text>
+<text x="132.5" y="438" text-anchor="middle" font-size="17" fill="#002d72" font-weight="700">demonstrations</text>
+<text x="360" y="417" text-anchor="middle" font-size="18" fill="#002d72" font-weight="700">Least-squares solve</text>
+<text x="360" y="440" text-anchor="middle" font-size="14" fill="#53677e" font-weight="500">Task coefficients</text>
+<text x="132.5" y="540" text-anchor="middle" font-size="17" fill="#002d72" font-weight="700">Task specification</text>
+<text x="360" y="528" text-anchor="middle" font-size="18" fill="#002d72" font-weight="700">Trained operator</text>
+<text x="360" y="551" text-anchor="middle" font-size="14" fill="#53677e" font-weight="500">Task coefficients</text>
+<text x="248" y="595" text-anchor="middle" font-size="14" fill="#53677e" font-weight="500">Choose either inference route</text>
+<rect class="fa-policy" x="535" y="426" width="220" height="108" rx="12" fill="#eaf2fc" stroke="#8faecf" stroke-width="1.4"/>
+<rect class="fa-node" x="825" y="439" width="210" height="81" rx="12" fill="#fff" stroke="#b9cada" stroke-width="1.4"/>
+<text x="645" y="452" text-anchor="middle" font-size="19" fill="#002d72" font-weight="700">Feedback policy</text>
+<text x="645" y="479" text-anchor="middle" font-size="15" fill="#53677e" font-weight="500">Combine fixed bases</text>
+<text x="645" y="502" text-anchor="middle" font-size="15" fill="#53677e" font-weight="500">with task coefficients</text>
+<text x="930" y="468" text-anchor="middle" font-size="19" fill="#002d72" font-weight="700">System dynamics</text>
+<text x="930" y="497" text-anchor="middle" font-size="15" fill="#53677e" font-weight="500">Apply control</text>
+<path class="fa-wire" d="M225 423H265" fill="none" stroke="#7b95b1" stroke-width="2.1" stroke-linejoin="round" marker-end="url(#fa-arrow)"/>
+<path class="fa-wire" d="M225 534H265" fill="none" stroke="#7b95b1" stroke-width="2.1" stroke-linejoin="round" marker-end="url(#fa-arrow)"/>
+<path class="fa-wire" d="M455 423H492V479H535" fill="none" stroke="#7b95b1" stroke-width="2.1" stroke-linejoin="round" marker-end="url(#fa-arrow)"/>
+<path class="fa-wire" d="M455 534H492V479H535" fill="none" stroke="#7b95b1" stroke-width="2.1" stroke-linejoin="round" marker-end="url(#fa-arrow)"/>
+<path class="fa-wire" d="M755 479H825" fill="none" stroke="#7b95b1" stroke-width="2.1" stroke-linejoin="round" marker-end="url(#fa-arrow)"/>
+<text x="790" y="466" text-anchor="middle" font-size="13" fill="#53677e" font-weight="500">control</text>
+<path class="fa-frozen" d="M930 520V588H645V534" fill="none" stroke="#002d72" stroke-width="2.1" stroke-linejoin="round" marker-end="url(#fa-blue-arrow)"/>
+<text x="794" y="612" text-anchor="middle" font-size="15" fill="#002d72" font-weight="500">Next state + time</text>
+<path class="fa-flow fa-training-flow" d="M220 148H265" fill="none" stroke="#007e79" stroke-width="4" stroke-linecap="round" stroke-dasharray="2 22" opacity="0"/>
+<path class="fa-flow fa-learning" d="M455 148H510" fill="none" stroke="#007e79" stroke-width="4" stroke-linecap="round" stroke-dasharray="2 22" opacity="0"/>
+<path class="fa-flow fa-learning" d="M622.5 190V229H360V190" fill="none" stroke="#007e79" stroke-width="4" stroke-linecap="round" stroke-dasharray="2 22" opacity="0"/>
+<path class="fa-flow fa-operator-fit" d="M360 106V80H925V106" fill="none" stroke="#007e79" stroke-width="4" stroke-linecap="round" stroke-dasharray="2 22" opacity="0"/>
+<path class="fa-flow fa-data-inference" d="M225 423H265" fill="none" stroke="#007e79" stroke-width="4" stroke-linecap="round" stroke-dasharray="2 22" opacity="0"/>
+<path class="fa-flow fa-data-inference" d="M455 423H492V479H535" fill="none" stroke="#007e79" stroke-width="4" stroke-linecap="round" stroke-dasharray="2 22" opacity="0"/>
+<path class="fa-flow fa-parameter-inference" d="M225 534H265" fill="none" stroke="#007e79" stroke-width="4" stroke-linecap="round" stroke-dasharray="2 22" opacity="0"/>
+<path class="fa-flow fa-parameter-inference" d="M455 534H492V479H535" fill="none" stroke="#007e79" stroke-width="4" stroke-linecap="round" stroke-dasharray="2 22" opacity="0"/>
+<path class="fa-flow fa-feedback" d="M755 479H825" fill="none" stroke="#007e79" stroke-width="4" stroke-linecap="round" stroke-dasharray="2 22" opacity="0"/>
+<path class="fa-flow fa-feedback" d="M930 520V588H645V534" fill="none" stroke="#007e79" stroke-width="4" stroke-linecap="round" stroke-dasharray="2 22" opacity="0"/>
+</svg>
+</div>
+   <div class="figure-controls"><button class="btn" id="toggle-abstract" type="button" aria-pressed="false" aria-controls="feoc-abstract" hidden>Pause animation</button><a href="assets/figures/overview.html">Open full-size overview</a></div>
+   <figcaption>Learn shared policy bases from training tasks, then infer new-task coefficients from demonstrations or task parameters. The learned bases remain fixed during deployment.<span class="mobile-figure-hint">Scroll horizontally to follow every stage.</span></figcaption>
   </figure>
   <div class="logos">
    <a href="https://solaris-jhu.github.io/solaris-website/"><img class="square" src="assets/logos/solaris.png" width="500" height="500" alt="SOLARIS Lab"></a>
    <a href="https://engineering.jhu.edu/"><img src="assets/logos/jhu-whiting.svg" width="280" height="70" alt="Johns Hopkins Whiting School of Engineering"></a>
    <a href="https://oden.utexas.edu/"><img src="assets/logos/ut-austin.svg" width="280" height="70" alt="The University of Texas at Austin"></a>
+   <a href="https://www.ucla.edu/"><img class="ucla-logo" src="assets/logos/ucla.svg" width="360" height="169" alt="University of California, Los Angeles"></a>
   </div>
  </div>
 </header>
@@ -80,7 +194,7 @@
   <div><span class="num">2</span><h3>Two transfer routes</h3><p>Infer coefficients by least squares (LS) from task data, or with an optional learned parameter-to-coefficient operator.</p></div>
   <div><span class="num">3</span><h3>Feedback across initial states</h3><p>Evaluate a state-and-time policy repeatedly in a rollout, tested on new initial conditions and objectives.</p></div>
  </div>
- <p class="source-note">Formulation: Section II, Eqs. (1)–(3). Contributions: Sections I and III. Scientific content follows <a href="https://arxiv.org/abs/2509.18404v2">arXiv v2, 11 March 2026</a>.</p>
+ <p class="source-note">Problem formulation: <a href="https://arxiv.org/abs/2509.18404v2">Section II, Equations (1)–(3)</a>.</p>
 </div></section>
 <section id="method" class="alt"><div class="wrap wrap-narrow">
  <h2>Learn the bases offline. Infer the coefficients online.</h2>
@@ -92,7 +206,7 @@
   <h3>Fit a common control space</h3>
   <p>Collect state–time–control demonstrations \(\mathcal D_{S_k}\) for each training task, using numerical optimal control solvers or existing policies. For the current bases, solve for each task’s LS coefficients. Then update the basis parameters by gradient descent on reconstruction error plus basis-norm regularization. Repeat these steps during training.</p>
   <div class="math">$$C(\mathbf c,\mathcal D)=\frac{1}{M}\sum_{i=1}^{M}\left\|\mathbf u_i-\sum_{j=1}^{p}c_j\phi_j(\mathbf x_i,t_i)\right\|_2^2.$$</div>
-  <p class="detail">Algorithm 1 adds \(\lambda\sum_j\|\phi_j\|_{\mathcal H}^2\) to the reconstruction loss. The implementation uses the FunctionEncoder library; Section II also describes Tikhonov regularization for numerical stability of the coefficient solve.</p>
+  <p class="detail">Here \(M\) is the number of demonstration samples. Algorithm 1 adds \(\lambda\sum_j\|\phi_j\|_{\mathcal H}^2\) to the reconstruction loss, with regularization weight \(\lambda\). Tikhonov regularization improves numerical stability of the coefficient solve.</p>
  </div>
  <div class="method-step">
   <div class="step-label"><span>02</span><span>Optional offline stage · operator learning</span></div>
@@ -113,19 +227,71 @@
   <div class="step-label"><span>04</span><span>Online · state feedback</span></div>
   <h3>Evaluate, apply control, observe the next state</h3>
   <p>At each rollout step, the current state and time enter the fixed bases. Combine their outputs with the inferred coefficients, apply the resulting control to the dynamics, and feed the updated state into the next policy evaluation. The coefficients describe the task; the basis evaluations respond to the changing state.</p>
-  <figure class="figure feedback-figure"><a class="figure-link" href="assets/figures/feedback.svg" aria-label="Open the feedback diagram at full size"><img src="assets/figures/feedback.svg" width="1000" height="310" alt="Current state and time enter fixed policy basis functions. Task coefficients weight the basis outputs to produce control. The dynamical system evolves, returning its state to the policy in a closed feedback loop."></a><figcaption>Deployment structure from Eq. (7) and the released rollout scripts. The diagram is a static explanation of the feedback computation.<span class="mobile-figure-hint">Scroll the diagram horizontally or open it at full size.</span></figcaption></figure>
+  <figure class="figure feedback-figure"><div class="feedback-scroll" tabindex="0" role="region" aria-label="State feedback with fixed policy bases"><style>
+.feedback-diagram { position: relative; width: 1000px; height: 355px; max-width: none; box-sizing: border-box; overflow: hidden; background: #fff; color: #1a1f2b; font-family: Inter, system-ui, sans-serif; font-size: 18px; line-height: 1.35; }
+.feedback-diagram *, .feedback-diagram *::before, .feedback-diagram *::after { box-sizing: border-box; }
+.feedback-diagram__wires { position: absolute; inset: 0; width: 1000px; height: 355px; max-width: none; }
+.feedback-diagram__heading { position: absolute; top: 24px; left: 24px; font-size: 20px; font-weight: 600; color: #002d72; }
+.feedback-diagram__fixed { position: absolute; top: 58px; left: 24px; font-size: 16px; color: #5b6470; }
+.feedback-diagram__node { position: absolute; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 15px; text-align: center; }
+.feedback-diagram__label { font-size: 17px; font-weight: 600; color: #002d72; }
+.feedback-diagram__input { left: 17px; top: 144px; width: 138px; height: 80px; gap: 12px; }
+.feedback-diagram__input .feedback-diagram__label { font-size: 16px; font-weight: 500; color: #1a1f2b; }
+.feedback-diagram__bases { left: 185px; top: 130px; width: 250px; height: 110px; }
+.feedback-diagram__sum { left: 495px; top: 130px; width: 230px; height: 110px; }
+.feedback-diagram__dynamics { left: 785px; top: 130px; width: 195px; height: 110px; }
+.feedback-diagram__coefficients { left: 500px; top: 20px; width: 220px; height: 76px; gap: 9px; }
+.feedback-diagram__coefficients .feedback-diagram__label { color: #0b7069; }
+.feedback-diagram__math { display: inline-block; font-size: 22px; line-height: normal; white-space: nowrap; }
+.feedback-diagram__math .katex { font-size: 1em; }
+.feedback-diagram__dynamics .feedback-diagram__math { font-size: 19px; }
+.feedback-diagram__wire-label { position: absolute; top: 148px; text-align: center; font-size: 19px; }
+.feedback-diagram__basis-output { left: 437px; width: 56px; }
+.feedback-diagram__control-output { left: 727px; width: 56px; }
+.feedback-diagram__return-label { position: absolute; top: 316px; left: 200px; width: 590px; text-align: center; font-size: 17px; color: #5b6470; }
+.feedback-diagram__sr { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+</style>
+<div class="feedback-diagram" role="group" aria-labelledby="feedback-diagram-title" aria-describedby="feedback-diagram-description">
+ <span id="feedback-diagram-title" class="feedback-diagram__heading">Feedback control</span>
+ <span class="feedback-diagram__fixed">Basis parameters stay fixed</span>
+ <span id="feedback-diagram-description" class="feedback-diagram__sr">Current state and time enter the fixed neural basis functions. Coefficients inferred for the task weight the basis outputs to produce a control input. The dynamics evolve under that input, and the updated state returns for the next policy evaluation.</span>
+ <svg class="feedback-diagram__wires" viewBox="0 0 1000 355" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+  <defs><marker id="feedback-diagram-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 Z" fill="#002d72"/></marker></defs>
+  <g fill="#f1f6fc" stroke="#bdcde0" stroke-width="1.4">
+   <rect x="185" y="130" width="250" height="110" rx="12"/>
+   <rect x="495" y="130" width="230" height="110" rx="12"/>
+   <rect x="785" y="130" width="195" height="110" rx="12"/>
+  </g>
+  <g fill="none" stroke="#002d72" stroke-width="2.2" marker-end="url(#feedback-diagram-arrow)">
+   <path d="M155 185 H185"/>
+   <path d="M435 185 H495"/>
+   <path d="M725 185 H785"/>
+   <path d="M610 96 V130"/>
+   <path d="M882.5 240 V297 H120 V220 H185"/>
+  </g>
+ </svg>
+ <div class="feedback-diagram__node feedback-diagram__input"><span class="feedback-diagram__label">State and time</span><span class="feedback-diagram__math " data-tex="\mathbf{x}(t),\,t"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="bold">x</mi><mo stretchy="false">(</mo><mi>t</mi><mo stretchy="false">)</mo><mo separator="true">,</mo><mtext> </mtext><mi>t</mi></mrow><annotation encoding="application/x-tex">\mathbf{x}(t),\,t</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathbf">x</span><span class="mopen">(</span><span class="mord mathnormal">t</span><span class="mclose">)</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">t</span></span></span></span></span></div>
+ <div class="feedback-diagram__node feedback-diagram__bases"><span class="feedback-diagram__label">Evaluate fixed bases</span><span class="feedback-diagram__math " data-tex="\phi_j(\mathbf{x},t;\boldsymbol{\theta}_j)"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>ϕ</mi><mi>j</mi></msub><mo stretchy="false">(</mo><mi mathvariant="bold">x</mi><mo separator="true">,</mo><mi>t</mi><mo separator="true">;</mo><msub><mi mathvariant="bold-italic">θ</mi><mi>j</mi></msub><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\phi_j(\mathbf{x},t;\boldsymbol{\theta}_j)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0361em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathnormal">ϕ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.05724em;">j</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathbf">x</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">t</span><span class="mpunct">;</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord"><span class="mord"><span class="mord boldsymbol" style="margin-right:0.03194em;">θ</span></span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.05724em;">j</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span></span></div>
+ <div class="feedback-diagram__node feedback-diagram__coefficients"><span class="feedback-diagram__label">Task coefficients</span><span class="feedback-diagram__math " data-tex="c_j(\boldsymbol{\eta})"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>c</mi><mi>j</mi></msub><mo stretchy="false">(</mo><mi mathvariant="bold-italic">η</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">c_j(\boldsymbol{\eta})</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0361em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathnormal">c</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.05724em;">j</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord"><span class="mord"><span class="mord boldsymbol" style="margin-right:0.03704em;">η</span></span></span><span class="mclose">)</span></span></span></span></span></div>
+ <div class="feedback-diagram__node feedback-diagram__sum"><span class="feedback-diagram__label">Weight and sum</span><span class="feedback-diagram__math " data-tex="\mathbf{u}=\sum_{j=1}^{p}c_j\phi_j"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="bold">u</mi><mo>=</mo><msubsup><mo>∑</mo><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><mi>p</mi></msubsup><msub><mi>c</mi><mi>j</mi></msub><msub><mi>ϕ</mi><mi>j</mi></msub></mrow><annotation encoding="application/x-tex">\mathbf{u}=\sum_{j=1}^{p}c_j\phi_j</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4444em;"></span><span class="mord mathbf">u</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1.2401em;vertical-align:-0.4358em;"></span><span class="mop"><span class="mop op-symbol small-op" style="position:relative;top:0em;">∑</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.8043em;"><span style="top:-2.4003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight" style="margin-right:0.05724em;">j</span><span class="mrel mtight">=</span><span class="mord mtight">1</span></span></span></span><span style="top:-3.2029em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">p</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.4358em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal">c</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.05724em;">j</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span><span class="mord"><span class="mord mathnormal">ϕ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.05724em;">j</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span></span></span></span></div>
+ <div class="feedback-diagram__node feedback-diagram__dynamics"><span class="feedback-diagram__label">Evolve dynamics</span><span class="feedback-diagram__math " data-tex="\dot{\mathbf{x}}=f(\mathbf{x},\mathbf{u},t)"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover accent="true"><mi mathvariant="bold">x</mi><mo>˙</mo></mover><mo>=</mo><mi>f</mi><mo stretchy="false">(</mo><mi mathvariant="bold">x</mi><mo separator="true">,</mo><mi mathvariant="bold">u</mi><mo separator="true">,</mo><mi>t</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\dot{\mathbf{x}}=f(\mathbf{x},\mathbf{u},t)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6813em;"></span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.6813em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathbf">x</span></span><span style="top:-3.0134em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.1111em;"><span class="mord">˙</span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.10764em;">f</span><span class="mopen">(</span><span class="mord mathbf">x</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathbf">u</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">t</span><span class="mclose">)</span></span></span></span></span></div>
+ <span class="feedback-diagram__math feedback-diagram__wire-label feedback-diagram__basis-output" data-tex="\phi_j"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>ϕ</mi><mi>j</mi></msub></mrow><annotation encoding="application/x-tex">\phi_j</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.9805em;vertical-align:-0.2861em;"></span><span class="mord"><span class="mord mathnormal">ϕ</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.05724em;">j</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2861em;"><span></span></span></span></span></span></span></span></span></span></span>
+ <span class="feedback-diagram__math feedback-diagram__wire-label feedback-diagram__control-output" data-tex="\mathbf{u}(t)"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="bold">u</mi><mo stretchy="false">(</mo><mi>t</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\mathbf{u}(t)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathbf">u</span><span class="mopen">(</span><span class="mord mathnormal">t</span><span class="mclose">)</span></span></span></span></span>
+ <span class="feedback-diagram__return-label">Updated state for the next policy evaluation</span>
+</div>
+</div><figcaption>Task coefficients remain fixed while the observed state changes.<span class="mobile-figure-hint">Scroll horizontally or <a href="assets/figures/feedback.html">open the full-size feedback diagram</a>.</span></figcaption></figure>
  </div>
- <p class="source-note">Method: Eq. (7), Eq. (8), Algorithms 1–2 and Section III. The operator coefficient-target loss shown here follows Algorithm 2 and the released training code; the adjacent paper prose describes it differently.</p>
+ <p class="source-note">Method: Equations (7)–(8) and Algorithms 1–2.</p>
 </div></section>
 <section id="results"><div class="wrap wrap-narrow">
  <h2>Transfer across targets and obstacle costs</h2>
- <p>Three simulated problem families test the learned policies against discretization-based numerical optimal control solutions. The paper reports experiments on an NVIDIA A100 GPU. The values below are reported means, in the paper’s objective units; no confidence intervals or variability across training seeds are supplied.</p>
- <figure class="figure"><a class="figure-link" href="assets/figures/objective-comparison.svg" aria-label="Open full-size objective comparison"><img src="assets/figures/objective-comparison.svg" width="1000" height="480" alt="Relative increases in mean objective from Tables I and II. New 2D interpolation: LS 0.65 percent, operator 2.66 percent; extrapolation: LS 4.04 percent, operator 9.09 percent. New quadcopter targets: LS 0.44 percent, operator 7.38 percent."></a><figcaption>Replot of published means from Tables I–II, not a new experiment. Each percentage is \(100(\bar J_{\rm FE}/\bar J_{\rm ref}-1)\), computed from the rounded table entries. It is a ratio of means, not a mean of per-trajectory errors. No uncertainty bars are available. <span class="mobile-figure-hint">Scroll horizontally to read the figure at full size.</span></figcaption></figure>
+ <p>Three simulated problem families—two-dimensional (2D) path planning, quadcopter control, and bicycle control—test the learned policies against discretization-based numerical optimal control solutions. Experiments use an NVIDIA A100 graphics processing unit (GPU). Function encoder transfer with least-squares coefficients is labeled FE–LS; FE–operator uses the learned coefficient network. Values are reported means in the paper's objective units; confidence intervals and variability across training seeds are not reported.</p>
+ <figure class="figure"><a class="figure-link" href="assets/figures/objective-comparison.svg" aria-label="Open full-size objective comparison"><img src="assets/figures/objective-comparison.svg" width="1000" height="480" alt="Relative increases in mean objective from Tables I and II. New 2D interpolation: LS 0.65 percent, operator 2.66 percent; extrapolation: LS 4.04 percent, operator 9.09 percent. New quadcopter targets: LS 0.44 percent, operator 7.38 percent."></a><figcaption>Relative increase in mean objective: \(100(\bar J_{\rm FE}/\bar J_{\rm ref}-1)\), computed from the published means in Tables I–II. These are ratios of rounded means; per-trajectory error distributions and uncertainty estimates are not reported.<span class="mobile-figure-hint">Scroll horizontally to read the figure at full size.</span></figcaption></figure>
  <h3 id="path-planning">2D path planning: new destinations</h3>
  <p>A planar integrator \(\dot{\mathbf x}=\mathbf u\) navigates a Gaussian obstacle cost. Sixteen target locations form the training set, with 200 numerically solved trajectories per target. The horizon is \(T=1\), discretized into 20 steps. Tests include seen targets, new interpolated targets, and extrapolation, all with new initial states.</p>
  <div class="table-wrap" tabindex="0" role="region" aria-label="Table I · mean objective, 2D path planning"><table class="results" id="table1"><caption>Table I · mean objective, 2D path planning</caption><thead><tr><th scope="col">Evaluation</th><th scope="col">Numerical reference</th><th scope="col">FE–LS</th><th scope="col">FE–operator</th></tr></thead><tbody><tr><th scope="row">Seen target</th><td>4.8609</td><td>4.8737</td><td>4.9625</td></tr><tr><th scope="row">New target: interpolation</th><td>4.8295</td><td>4.8608</td><td>4.9578</td></tr><tr><th scope="row">New target: extrapolation</th><td>4.8782</td><td>5.0751</td><td>5.3214</td></tr></tbody></table></div>
  <p class="detail">The paper’s objective combines control effort, a Gaussian obstacle penalty, and quadratic terminal cost. Its published means average over target states and initial conditions. The released LS evaluation script samples 500 state–time–control points from 40 trajectories per task for coefficient inference, then evaluates those 40 initial states.</p>
- <details><summary>Training setup and source qualifications</summary><p>Section V-A specifies 100 bases, a four-layer multilayer perceptron with hidden width 256, Adam at learning rate 0.001, and 20,000 training steps. The paper’s prose states that errors are below 4% across test cases, but Table I gives larger relative differences for extrapolation, especially for the operator. This page uses the table values without that blanket claim.</p><p>The released 2D evaluation script accumulates control norms, whereas the paper specifies squared control norms. Table I is reproduced from the paper; these values have not been independently reproduced from that script.</p></details>
+ <details><summary>Training setup and objective</summary><p>Training uses 100 bases, a four-layer multilayer perceptron with hidden width 256, adaptive moment estimation (Adam) at learning rate 0.001, and 20,000 training steps.</p><p>The reported objective uses squared control norms. The released 2D evaluation script accumulates unsquared control norms, so its cost calculation differs from the paper's formulation.</p></details>
  <h3 id="quadcopter">Quadcopter: nonlinear dynamics in 12 states</h3>
  <p>The quadcopter has 12 states and four control inputs: thrust and three torques. Training uses 64 target locations with 80 trajectories per target. Testing introduces 27 new targets, each with 25 trajectories. The horizon is \(T=2\), with 50 integration steps.</p>
  <div class="table-wrap" tabindex="0" role="region" aria-label="Table II · mean objective, quadcopter"><table class="results" id="table2"><caption>Table II · mean objective, quadcopter</caption><thead><tr><th scope="col">Evaluation</th><th scope="col">Numerical reference</th><th scope="col">FE–LS</th><th scope="col">FE–operator</th></tr></thead><tbody><tr><th scope="row">Seen target</th><td>276.9546</td><td>278.8933</td><td>278.4307</td></tr><tr><th scope="row">New target</th><td>274.3089</td><td>275.5074</td><td>294.5629</td></tr></tbody></table></div>
@@ -135,7 +301,7 @@
  <p>A nonlinear bicycle model changes its route as one or two Gaussian obstacle penalties vary. This experiment uses LS transfer only. The single-obstacle study has 144 training and 36 test configurations. The double-obstacle study splits 576 configurations into 544 for training and 32 for testing. Each configuration has 100 trajectories; the horizon is \(T=5\).</p>
  <div class="table-wrap" tabindex="0" role="region" aria-label="Table III · bicycle, means on unseen configurations"><table class="results" id="table3"><caption>Table III · bicycle, means on unseen configurations</caption><thead><tr><th scope="col">Setting</th><th scope="col">Method</th><th scope="col">Control cost</th><th scope="col">Obstacle cost</th><th scope="col">Terminal position deviation</th></tr></thead><tbody><tr><th scope="row">Single obstacle</th><td>FE–LS</td><td>2.6789</td><td>0.0463</td><td>0.0012</td></tr><tr><th scope="row">Single obstacle</th><td>Numerical reference</td><td>2.6480</td><td>0.0385</td><td>0.00005</td></tr><tr><th scope="row">Double obstacles</th><td>FE–LS</td><td>3.0370</td><td>0.5750</td><td>0.0046</td></tr><tr><th scope="row">Double obstacles</th><td>Numerical reference</td><td>2.9668</td><td>0.5286</td><td>0.00004</td></tr></tbody></table></div>
  <p class="detail">Table III averages over unseen configurations. Terminal position deviation is the reported position-error metric; the released evaluation code computes squared Euclidean error in \(x,y\). The LS scripts use 50 trajectories to estimate coefficients and evaluate the other 50. The obstacle is a smooth cost penalty, so these results do not establish collision-free operation.</p>
- <p class="source-note">Results: Section V-A / Table I; Section V-B / Table II; Section V-C / Table III. Numerical references are produced with SciPy or CasADi. The paper provides no end-to-end timing table, inference batch-size benchmark, or repeated-run statistics; no runtime or speedup claim is made here.</p>
+ <p class="source-note">Results: Tables I–III. Numerical references use SciPy or CasADi. The paper provides no end-to-end timing table, inference batch-size benchmark, or repeated-run statistics.</p>
 </div></section>
 <section id="scope" class="alt"><div class="wrap wrap-narrow">
  <h2>What the results establish—and their scope</h2>
@@ -153,10 +319,9 @@
   <a class="resource-card" href="https://arxiv.org/abs/2509.18404v2"><strong>Full paper and appendix <span aria-hidden="true">↗</span></strong><span>Version 2 · 11 March 2026 · open access</span></a>
   <a class="resource-card" href="https://github.com/XJ-LI/FE_OC"><strong>Research code <span aria-hidden="true">↗</span></strong><span>PyTorch implementation, evaluation scripts, and pretrained models</span></a>
   <a class="resource-card" href="https://github.com/XJ-LI/FE_OC/tree/65337fde9b540b3ecb8f4f4b0771ad1efae71f6a/2D_toy_control/Dataset"><strong>Released trajectory data <span aria-hidden="true">↗</span></strong><span>2D datasets; quadcopter datasets are also included in the repository</span></a>
-  <a class="resource-card" href="https://ieeexplore.ieee.org/document/11615530"><strong>ACC publication record <span aria-hidden="true">↗</span></strong><span>IEEE Xplore record linked by the bibliographic index</span></a>
+  <a class="resource-card" href="https://ieeexplore.ieee.org/document/11615530"><strong>Published paper · ACC 2026 <span aria-hidden="true">↗</span></strong><span>Institute of Electrical and Electronics Engineers (IEEE) Xplore</span></a>
  </div>
- <p class="source-note">Code inspected at <a href="https://github.com/XJ-LI/FE_OC/tree/65337fde9b540b3ecb8f4f4b0771ad1efae71f6a">commit 65337fd</a>. The bicycle scripts refer to separately hosted datasets; their downloads were not verified. The repository README lists FunctionEncoder 0.1.1 and PyTorch 2.8.0. Reproduction requires checking those dependencies and the documented data paths.</p>
- <p class="source-note">ACC 2026 acceptance is confirmed by the <a href="https://drgona.github.io/news/">authors’ announcement</a>; the <a href="https://dblp.org/rec/conf/amcc/LiKVKOD26.html?view=bibtex">bibliographic record</a> lists pages 2003–2010. IEEE blocks automated metadata retrieval, so this page’s citation identifies the verified arXiv revision rather than asserting an unverified conference DOI.</p>
+ <p class="source-note">Reproducible implementation: <a href="https://github.com/XJ-LI/FE_OC/tree/65337fde9b540b3ecb8f4f4b0771ad1efae71f6a">research code version 65337fd</a>, with FunctionEncoder 0.1.1 and PyTorch 2.8.0. The bicycle examples use separately hosted datasets linked from the code.</p>
 </div></section>
 <section id="citation" class="alt"><div class="wrap wrap-narrow">
  <h2>Cite the paper</h2><p>BibTeX for the arXiv revision summarized on this page.</p>

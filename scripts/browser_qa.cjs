@@ -131,16 +131,35 @@ async function runCase(browser, target, configuration) {
     throw error;
   }
   async function screenshot(suffix) {
-    const filename = `${configuration.name}-${suffix}.png`;
-    await page.screenshot({ path: path.join(out, filename), fullPage: true });
-    result.screenshots.push(filename);
-    // Public-page previews can be inspected through Actions logs when artifact
-    // downloads are unavailable to a reviewer. No browser storage is captured.
-    if (options['emit-preview'] && suffix === 'initial' && ['desktop', 'mobile-390'].includes(configuration.name)) {
-      const previewName = `${configuration.name}-preview.jpg`;
-      const bytes = await page.screenshot({ path: path.join(out, previewName), fullPage: true, type: 'jpeg', quality: 55 });
-      const encoded = bytes.toString('base64');
-      for (let offset = 0; offset < encoded.length; offset += 4096) console.log(`FEOC_PREVIEW ${previewName} ${offset / 4096} ${encoded.slice(offset, offset + 4096)}`);
+    // Freeze just the explanatory animation while capturing the same readable
+    // frame. Restore its time and playback state before any interaction tests.
+    const frozen = await page.evaluateHandle(() => {
+      const states = (document.querySelector('#feoc-abstract')?.getAnimations({ subtree: true }) || [])
+        .map(animation => ({ animation, time: animation.currentTime, playbackRate: animation.playbackRate }));
+      // Do not call play()/pause(): those can override CSS animation-play-state
+      // and would contaminate the subsequent test of the user's pause control.
+      for (const { animation } of states) { animation.playbackRate = 0; animation.currentTime = 1200; }
+      return states;
+    });
+    try {
+      if (await frozen.evaluate(states => states.length > 0)) result.screenshotAnimationTimeMs = 1200;
+      const filename = `${configuration.name}-${suffix}.png`;
+      await page.screenshot({ path: path.join(out, filename), fullPage: true });
+      result.screenshots.push(filename);
+      // Public-page previews can be inspected through Actions logs when artifact
+      // downloads are unavailable to a reviewer. No browser storage is captured.
+      if (options['emit-preview'] && suffix === 'initial' && ['desktop', 'mobile-390'].includes(configuration.name)) {
+        const previewName = `${configuration.name}-preview.jpg`;
+        const bytes = await page.screenshot({ path: path.join(out, previewName), fullPage: true, type: 'jpeg', quality: 55 });
+        const encoded = bytes.toString('base64');
+        for (let offset = 0; offset < encoded.length; offset += 4096) console.log(`FEOC_PREVIEW ${previewName} ${offset / 4096} ${encoded.slice(offset, offset + 4096)}`);
+      }
+    } finally {
+      await frozen.evaluate(states => states.forEach(({ animation, time, playbackRate }) => {
+        animation.currentTime = time;
+        animation.playbackRate = playbackRate;
+      }));
+      await frozen.dispose();
     }
   }
   try {
@@ -175,10 +194,44 @@ async function runCase(browser, target, configuration) {
       return evidence;
     });
 
+    await check('Paper button and UCLA logo are present', async () => {
+      const evidence = await page.evaluate(() => ({
+        paperLinks: [...document.querySelectorAll('.buttons a')].filter(link => /^Paper(?:\s|$)/.test(link.textContent.trim())).map(link => ({ text: link.textContent.trim(), href: link.href })),
+        uclaImages: [...document.images].filter(img => /ucla/i.test(img.getAttribute('src') + ' ' + img.alt) || /University of California,?\s+Los Angeles/i.test(img.alt))
+          .map(img => ({ src: img.getAttribute('src'), alt: img.alt, complete: img.complete, width: img.naturalWidth, height: img.naturalHeight }))
+      }));
+      assert(evidence.paperLinks.length === 1 && evidence.paperLinks[0].href === 'https://ieeexplore.ieee.org/document/11615530', 'Paper button does not target the publication record', evidence.paperLinks);
+      assert(evidence.uclaImages.length > 0 && evidence.uclaImages.every(img => img.complete && img.width > 0 && img.height > 0), 'UCLA logo is missing or failed to decode', evidence.uclaImages);
+      return evidence;
+    });
+
+    await check('Feedback diagram equations are typeset with KaTeX', async () => {
+      const evidence = await page.evaluate(() => {
+        const diagram = document.querySelector('.feedback-diagram');
+        const equations = [...(diagram?.querySelectorAll('[data-tex]') || [])].map(element => ({
+          tex: element.dataset.tex, rendered: !!element.querySelector(':scope > .katex .katex-html'),
+          errors: element.querySelectorAll('.katex-error').length,
+          rawDirectText: [...element.childNodes].filter(node => node.nodeType === Node.TEXT_NODE).map(node => node.textContent).join('').trim()
+        }));
+        const rawText = [];
+        if (diagram) {
+          const walker = document.createTreeWalker(diagram, NodeFilter.SHOW_TEXT);
+          while (walker.nextNode()) {
+            const node = walker.currentNode;
+            if (!node.parentElement.closest('.katex') && /\\(?:mathbf|phi|sum|dot|boldsymbol|theta|eta)\b/.test(node.textContent)) rawText.push(node.textContent.trim());
+          }
+        }
+        return { equations, rawText };
+      });
+      assert(evidence.equations.length === 7 && evidence.equations.every(equation => equation.tex && equation.rendered && !equation.errors && !equation.rawDirectText), 'Feedback equations are missing or not rendered', evidence.equations);
+      assert(evidence.rawText.length === 0, 'Raw LaTeX appears outside rendered math', evidence.rawText);
+      return evidence;
+    });
+
     await check('No page-wide horizontal overflow', async () => {
       const measurements = await page.evaluate(() => ({
         viewport: innerWidth, document: document.documentElement.scrollWidth, body: document.body.scrollWidth,
-        scrollRegions: [...document.querySelectorAll('.math, .table-wrap, .figure-link, pre')].map(el => ({ class: el.className || el.tagName, width: el.clientWidth, contentWidth: el.scrollWidth, overflowX: getComputedStyle(el).overflowX }))
+        scrollRegions: [...document.querySelectorAll('.math, .table-wrap, .figure-link, .abstract-scroll, .feedback-scroll, pre')].map(el => ({ class: el.className || el.tagName, width: el.clientWidth, contentWidth: el.scrollWidth, overflowX: getComputedStyle(el).overflowX }))
       }));
       assert(measurements.document <= measurements.viewport + 1 && measurements.body <= measurements.viewport + 1, 'Page overflows horizontally', measurements);
       assert(measurements.scrollRegions.every(el => el.contentWidth <= el.width + 1 || ['auto', 'scroll'].includes(el.overflowX)), 'Wide content cannot be scrolled', measurements.scrollRegions);
@@ -215,6 +268,52 @@ async function runCase(browser, target, configuration) {
       }
     });
 
+    await check('Graphical abstract playback responds to keyboard and motion preferences', async () => {
+      const button = page.locator('#toggle-abstract');
+      assert(await button.count() === 1 && await page.locator('#feoc-abstract').count() === 1, 'Animation or playback button is missing');
+      const state = () => page.evaluate(() => {
+        const abstract = document.querySelector('#feoc-abstract');
+        const control = document.querySelector('#toggle-abstract');
+        return { paused: abstract.dataset.paused, disabled: control.disabled, text: control.textContent.trim(), pressed: control.getAttribute('aria-pressed'),
+          animations: abstract.getAnimations({ subtree: true }).map(animation => ({ name: animation.animationName || animation.id, time: animation.currentTime, playState: animation.playState, pending: animation.pending })) };
+      });
+      const initial = await state();
+      if (configuration.reducedMotion === 'reduce') {
+        assert(initial.disabled && initial.paused === 'true' && initial.pressed === 'true', 'Reduced motion must keep playback paused and its control disabled', initial);
+        assert(!initial.animations.some(animation => animation.playState === 'running' || animation.pending), 'Animation is active under reduced motion', initial);
+        return { initial, reducedMotion: true };
+      }
+      assert(!initial.disabled && initial.paused === 'false' && initial.text === 'Pause animation' && initial.pressed === 'false', 'Initial playback control state is inconsistent', initial);
+      await page.waitForFunction(() => document.querySelector('#feoc-abstract').getAnimations({ subtree: true }).some(animation => animation.playState === 'running' && !animation.pending && typeof animation.currentTime === 'number'));
+      const animation = await page.evaluateHandle(() => document.querySelector('#feoc-abstract').getAnimations({ subtree: true }).find(animation => animation.playState === 'running' && !animation.pending && typeof animation.currentTime === 'number'));
+      const sample = () => animation.evaluate(value => ({ time: value.currentTime, playState: value.playState, pending: value.pending }));
+      const samples = {};
+      try {
+        samples.runningBefore = await sample();
+        await delay(200);
+        samples.runningAfter = await sample();
+        assert(samples.runningAfter.time > samples.runningBefore.time + 50, 'Animation time does not progress during playback', samples);
+        await button.focus();
+        await waitForNavigationSettled('Animation playback control receives focus', '#toggle-abstract', { visible: true, focused: true });
+        await page.keyboard.press('Enter');
+        await page.waitForFunction(() => document.querySelector('#feoc-abstract').dataset.paused === 'true' && document.querySelector('#feoc-abstract').getAnimations({ subtree: true }).every(animation => animation.playState === 'paused' && !animation.pending));
+        const pausedControl = await state();
+        assert(pausedControl.text === 'Play animation' && pausedControl.pressed === 'true', 'Paused control label or pressed state is incorrect', pausedControl);
+        samples.pausedBefore = await sample();
+        await delay(200);
+        samples.pausedAfter = await sample();
+        assert(samples.pausedBefore.playState === 'paused' && Math.abs(samples.pausedAfter.time - samples.pausedBefore.time) < 1, 'Paused animation continues to progress', samples);
+        await page.keyboard.press('Enter');
+        await page.waitForFunction(() => document.querySelector('#feoc-abstract').dataset.paused === 'false' && document.querySelector('#feoc-abstract').getAnimations({ subtree: true }).some(animation => animation.playState === 'running' && !animation.pending));
+        await delay(200);
+        samples.resumed = await sample();
+        const resumedControl = await state();
+        assert(samples.resumed.playState === 'running' && samples.resumed.time > samples.pausedAfter.time + 50, 'Playback does not resume from its paused position', samples);
+        assert(resumedControl.text === 'Pause animation' && resumedControl.pressed === 'false', 'Resumed control label or pressed state is incorrect', resumedControl);
+        return { initial, pausedControl, resumedControl, samples };
+      } finally { await animation.dispose(); }
+    });
+
     await check('Every native disclosure opens and closes by keyboard', async () => {
       const summaries = page.locator('details > summary');
       const count = await summaries.count();
@@ -231,8 +330,9 @@ async function runCase(browser, target, configuration) {
       return { count };
     });
 
-    await check('Overflowing result tables scroll with arrow keys', async () => {
-      const regions = page.locator('.table-wrap');
+    await check('Overflowing figures and result tables scroll with arrow keys', async () => {
+      const selector = '.table-wrap, .abstract-scroll, .feedback-scroll';
+      const regions = page.locator(selector);
       let overflowing = 0;
       for (let i = 0; i < await regions.count(); i++) {
         const region = regions.nth(i);
@@ -240,11 +340,11 @@ async function runCase(browser, target, configuration) {
           overflowing++;
           await region.focus();
           await page.keyboard.press('ArrowRight');
-          await page.waitForFunction(index => document.querySelectorAll('.table-wrap')[index].scrollLeft > 0, i);
+          await page.waitForFunction(({ selector, index }) => document.querySelectorAll(selector)[index].scrollLeft > 0, { selector, index: i });
           await region.evaluate(el => { el.scrollLeft = 0; });
         }
       }
-      return { keyboardScrolledTables: overflowing };
+      return { keyboardScrolledRegions: overflowing };
     });
 
     await check('Citation button copies the actual BibTeX', async () => {

@@ -10,4 +10,11 @@ for(const m of html.matchAll(/\$\$([\s\S]*?)\$\$|\\\(([\s\S]*?)\\\)/g)) {
   count++;
 }
 if(count < 15) throw new Error('Unexpectedly few math expressions found.');
-console.log(`PASS: ${count} math expressions render with local KaTeX.`);
+let diagramCount=0;
+for(const m of html.matchAll(/data-tex="([^"]+)"/g)) {
+  const tex=m[1].replaceAll('&quot;','"').replaceAll('&lt;','<').replaceAll('&gt;','>').replaceAll('&amp;','&');
+  katex.renderToString(tex, {throwOnError:true,strict:'error'});
+  diagramCount++;
+}
+if(diagramCount!==7) throw new Error('Expected seven LaTeX equations in the feedback diagram.');
+console.log(`PASS: ${count} page equations and ${diagramCount} feedback equations render with local KaTeX.`);

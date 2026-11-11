@@ -8,7 +8,7 @@ Dedicated SOLARIS research page for **Zero-Shot Transferable Solution Method for
 - Live website: [solaris-jhu.github.io/FE-OC-website](https://solaris-jhu.github.io/FE-OC-website/).
 - **Published and verified on 11 November 2026:** [successful deployment and live browser checks](https://github.com/SOLARIS-JHU/FE-OC-website/actions/runs/43077280785). Desktop/mobile screenshots were visually reviewed. See `docs/QA.md` for evidence and source limitations.
 
-The implementation uses buildless HTML/CSS/JS, the Apache-licensed TQPNet foundation, locally hosted Inter/Fraunces fonts and KaTeX, the existing SOLARIS graphical abstract, and a transparent replot of paper tables. The research-code repository is separate and unchanged.
+The implementation uses buildless HTML/CSS/JS, the Apache-licensed TQPNet foundation, locally hosted Inter/Fraunces fonts and KaTeX, an animated method overview, LaTeX-rendered feedback equations, and a replot of paper tables. The primary Paper button links to the IEEE conference publication. The research-code repository is separate and unchanged.
 
 ## Preview and validate
 
@@ -31,6 +31,9 @@ GitHub Actions additionally installs Playwright 1.56.1 on Ubuntu 24.04 for CI-on
 - `scripts/build_page.py` is the editable page source; it writes the committed `index.html`. It is not a runtime dependency.
 - `data/results.json` preserves the exact strings transcribed from Tables I–III.
 - `scripts/generate_figures.py` reproduces the table replot and feedback SVG using only Python's standard library.
+- `scripts/generate_abstract.py` reproduces the animated overview and its static fallback. Then run `scripts/build_page.py` to embed the overview and generate its full-size page.
+- `node scripts/build_feedback.cjs` generates the seven feedback equations through bundled KaTeX and writes the inline fragment and full-size page. Run it before `scripts/build_page.py` when changing this diagram. The older feedback SVG is retained as a legacy asset.
+- The overview's pause/play control respects reduced-motion preferences. Without JavaScript, the embedded overview remains paused with every stage visible.
 - `scripts/make_social_preview.py` reproduces the social image using Pillow and local fonts.
 - After intentional asset edits, run `scripts/update_asset_manifest.py`, then validation.
 - `docs/SOURCE_MAP.md` maps claims, equations, numbers and code paths to sources, and records disagreements.
